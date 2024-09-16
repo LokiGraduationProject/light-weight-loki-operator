@@ -159,9 +159,115 @@ type RulesSpec struct {
 
 // LokiStackStatus defines the observed state of LokiStack
 type LokiStackStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Components provides summary of all Loki pod status grouped
+	// per component.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	Components LokiStackComponentStatus `json:"components,omitempty"`
+
+	// Storage provides summary of all changes that have occurred
+	// to the storage configuration.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	Storage LokiStackStorageStatus `json:"storage,omitempty"`
+
+	// Conditions of the Loki deployment health.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
+
+// LokiStackComponentStatus defines the map of per pod status per LokiStack component.
+// Each component is represented by a separate map of v1.Phase to a list of pods.
+type LokiStackComponentStatus struct {
+	// Compactor is a map to the pod status of the compactor pod.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Compactor",order=5
+	Compactor PodStatusMap `json:"compactor,omitempty"`
+
+	// Distributor is a map to the per pod status of the distributor deployment
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Distributor",order=1
+	Distributor PodStatusMap `json:"distributor,omitempty"`
+
+	// IndexGateway is a map to the per pod status of the index gateway statefulset
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="IndexGateway",order=6
+	IndexGateway PodStatusMap `json:"indexGateway,omitempty"`
+
+	// Ingester is a map to the per pod status of the ingester statefulset
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Ingester",order=2
+	Ingester PodStatusMap `json:"ingester,omitempty"`
+
+	// Querier is a map to the per pod status of the querier deployment
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Querier",order=3
+	Querier PodStatusMap `json:"querier,omitempty"`
+
+	// QueryFrontend is a map to the per pod status of the query frontend deployment
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Query Frontend",order=4
+	QueryFrontend PodStatusMap `json:"queryFrontend,omitempty"`
+
+	// Gateway is a map to the per pod status of the lokistack gateway deployment.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Gateway",order=5
+	Gateway PodStatusMap `json:"gateway,omitempty"`
+
+	// Ruler is a map to the per pod status of the lokistack ruler statefulset.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Ruler",order=6
+	Ruler PodStatusMap `json:"ruler,omitempty"`
+}
+
+// PodStatusMap defines the type for mapping pod status to pod name.
+type PodStatusMap map[PodStatus][]string
+
+// PodStatus is a short description of the status a Pod can be in.
+type PodStatus string
+
+// LokiStackStorageStatus defines the observed state of
+// the Loki storage configuration.
+type LokiStackStorageStatus struct {
+	// Schemas is a list of schemas which have been applied
+	// to the LokiStack.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	Schemas []ObjectStorageSchema `json:"schemas,omitempty"`
+
+	// CredentialMode contains the authentication mode used for accessing the object storage.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	CredentialMode CredentialMode `json:"credentialMode,omitempty"`
+}
+
+// CredentialMode represents the type of authentication used for accessing the object storage.
+//
+// +kubebuilder:validation:Enum=static;token;token-cco
+type CredentialMode string
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
