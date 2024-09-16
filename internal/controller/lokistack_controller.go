@@ -18,13 +18,15 @@ package controller
 
 import (
 	"context"
+	"errors"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
+	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers"
 )
 
 // LokiStackReconciler reconciles a LokiStack object
@@ -47,11 +49,38 @@ type LokiStackReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *LokiStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	var degraded *status.DegradedError
+	credentialMode, err := r.updateResources(ctx, req)
+	switch {
+	case errors.As(err, &degraded):
+		// degraded errors are handled by status.Refresh below
+	case err != nil:
+		return ctrl.Result{}, err
+	}
+
+	err = status.Refresh(ctx, r.Client, req, time.Now(), credentialMode, degraded)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if degraded != nil {
+		return ctrl.Result{
+			Requeue: degraded.Requeue,
+		}, nil
+	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *LokiStackReconciler) updateResources(ctx context.Context, req ctrl.Request) (lokiv1.CredentialMode, error) {
+
+	credentialMode, err := handlers.CreateOrUpdateLokiStack(ctx, r.Log, req, r.Client, r.Scheme, r.FeatureGates)
+	if err != nil {
+		return "", err
+	}
+
+	return credentialMode, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
