@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- loki_v1_lokistack.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

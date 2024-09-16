@@ -1,0 +1,12 @@
+apiVersion: loki.lightweight.com/v1
+kind: LokiStack
+metadata:
+  labels:
+    app.kubernetes.io/name: lokistack
+    app.kubernetes.io/instance: lokistack-sample
+    app.kubernetes.io/part-of: light-weight-loki-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: light-weight-loki-operator
+  name: lokistack-sample
+spec:
+  # TODO(user): Add fields here

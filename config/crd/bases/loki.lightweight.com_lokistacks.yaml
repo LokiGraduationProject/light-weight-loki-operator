@@ -1,0 +1,226 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: lokistacks.loki.lightweight.com
+spec:
+  group: loki.lightweight.com
+  names:
+    kind: LokiStack
+    listKind: LokiStackList
+    plural: lokistacks
+    singular: lokistack
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: LokiStack is the Schema for the LokiStacks API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              rules:
+                description: Rules defines the spec for the ruler component.
+                properties:
+                  enabled:
+                    description: Enabled defines a flag to enable/disable the ruler
+                      component
+                    type: boolean
+                  namespaceSelector:
+                    description: Namespaces to be selected for PrometheusRules discovery.
+                      If unspecified, only the same namespace as the LokiStack object
+                      is in is used.
+                    properties:
+                      matchExpressions:
+                        description: matchExpressions is a list of label selector
+                          requirements. The requirements are ANDed.
+                        items:
+                          description: A label selector requirement is a selector
+                            that contains values, a key, and an operator that relates
+                            the key and values.
+                          properties:
+                            key:
+                              description: key is the label key that the selector
+                                applies to.
+                              type: string
+                            operator:
+                              description: operator represents a key's relationship
+                                to a set of values. Valid operators are In, NotIn,
+                                Exists and DoesNotExist.
+                              type: string
+                            values:
+                              description: values is an array of string values. If
+                                the operator is In or NotIn, the values array must
+                                be non-empty. If the operator is Exists or DoesNotExist,
+                                the values array must be empty. This array is replaced
+                                during a strategic merge patch.
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: matchLabels is a map of {key,value} pairs. A
+                          single {key,value} in the matchLabels map is equivalent
+                          to an element of matchExpressions, whose key field is "key",
+                          the operator is "In", and the values array contains only
+                          "value". The requirements are ANDed.
+                        type: object
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  selector:
+                    description: A selector to select which LokiRules to mount for
+                      loading alerting/recording rules from.
+                    properties:
+                      matchExpressions:
+                        description: matchExpressions is a list of label selector
+                          requirements. The requirements are ANDed.
+                        items:
+                          description: A label selector requirement is a selector
+                            that contains values, a key, and an operator that relates
+                            the key and values.
+                          properties:
+                            key:
+                              description: key is the label key that the selector
+                                applies to.
+                              type: string
+                            operator:
+                              description: operator represents a key's relationship
+                                to a set of values. Valid operators are In, NotIn,
+                                Exists and DoesNotExist.
+                              type: string
+                            values:
+                              description: values is an array of string values. If
+                                the operator is In or NotIn, the values array must
+                                be non-empty. If the operator is Exists or DoesNotExist,
+                                the values array must be empty. This array is replaced
+                                during a strategic merge patch.
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: matchLabels is a map of {key,value} pairs. A
+                          single {key,value} in the matchLabels map is equivalent
+                          to an element of matchExpressions, whose key field is "key",
+                          the operator is "In", and the values array contains only
+                          "value". The requirements are ANDed.
+                        type: object
+                    type: object
+                    x-kubernetes-map-type: atomic
+                required:
+                - enabled
+                type: object
+              size:
+                description: Size defines one of the support Loki deployment scale
+                  out sizes.
+                enum:
+                - 1x.demo
+                - 1x.extra-small
+                - 1x.small
+                - 1x.medium
+                type: string
+              storage:
+                description: Storage defines the spec for the object storage endpoint
+                  to store logs.
+                properties:
+                  schemas:
+                    default:
+                    - effectiveDate: "2020-10-11"
+                      version: v11
+                    description: Schemas for reading and writing logs.
+                    items:
+                      description: ObjectStorageSchema defines a schema version and
+                        the date when it will become effective.
+                      properties:
+                        effectiveDate:
+                          description: "EffectiveDate contains a date in YYYY-MM-DD
+                            format which is interpreted in the UTC time zone. \n The
+                            configuration always needs at least one schema that is
+                            currently valid. This means that when creating a new LokiStack
+                            it is recommended to add a schema with the latest available
+                            version and an effective date of \"yesterday\". New schema
+                            versions added to the configuration always needs to be
+                            placed \"in the future\", so that Loki can start using
+                            it once the day rolls over."
+                          pattern: ^([0-9]{4,})([-]([0-9]{2})){2}$
+                          type: string
+                        version:
+                          description: Version for writing and reading logs.
+                          enum:
+                          - v11
+                          - v12
+                          - v13
+                          type: string
+                      required:
+                      - effectiveDate
+                      - version
+                      type: object
+                    minItems: 1
+                    type: array
+                  secret:
+                    description: Secret for object storage authentication. Name of
+                      a secret in the same namespace as the LokiStack custom resource.
+                    properties:
+                      name:
+                        description: Name of a secret in the namespace configured
+                          for object storage secrets.
+                        type: string
+                      type:
+                        description: Type of object storage that should be used
+                        enum:
+                        - azure
+                        - gcs
+                        - s3
+                        - swift
+                        - alibabacloud
+                        type: string
+                    required:
+                    - name
+                    - type
+                    type: object
+                required:
+                - secret
+                type: object
+              storageClassName:
+                description: Storage class name defines the storage class for ingester/querier
+                  PVCs.
+                type: string
+            required:
+            - size
+            - storage
+            - storageClassName
+            type: object
+          status:
+            description: LokiStackStatus defines the observed state of LokiStack
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
