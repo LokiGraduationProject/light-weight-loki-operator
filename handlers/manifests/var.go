@@ -22,8 +22,14 @@ const (
 	// LabelGatewayComponent is the label value for the lokiStack-gateway component
 	LabelGatewayComponent string = "lokistack-gateway"
 
-	kubernetesComponentLabel    = "app.kubernetes.io/component"
-	kubernetesInstanceLabel     = "app.kubernetes.io/instance"
+	// EnvRelatedImageLoki is the environment variable to fetch the Loki image pullspec.
+	EnvRelatedImageLoki = "RELATED_IMAGE_LOKI"
+
+	// DefaultContainerImage declares the default fallback for loki image.
+	DefaultContainerImage = "docker.io/grafana/loki:3.1.1"
+
+	kubernetesComponentLabel = "app.kubernetes.io/component"
+	kubernetesInstanceLabel  = "app.kubernetes.io/instance"
 )
 
 // ComponentLabels is a list of all commonLabels including the app.kubernetes.io/component:<component> label

@@ -108,11 +108,6 @@ const (
 	ObjectStorageSchemaV13 ObjectStorageSchemaVersion = "v13"
 )
 
-// StorageSchemaEffectiveDate defines the type for the Storage Schema Effect Date
-//
-// +kubebuilder:validation:Pattern:="^([0-9]{4,})([-]([0-9]{2})){2}$"
-type StorageSchemaEffectiveDate string
-
 // ObjectStorageSecretSpec is a secret reference containing name only, no namespace.
 type ObjectStorageSecretSpec struct {
 	// Type of object storage that should be used
@@ -134,6 +129,11 @@ type ObjectStorageSecretSpec struct {
 //
 // +kubebuilder:validation:Enum=azure;gcs;s3;swift;alibabacloud;
 type ObjectStorageSecretType string
+
+const (
+	// ObjectStorageSecretS3 when using S3 for Loki storage
+	ObjectStorageSecretS3 ObjectStorageSecretType = "s3"
+)
 
 // LokiStackStatus defines the observed state of LokiStack
 type LokiStackStatus struct {
@@ -274,10 +274,17 @@ const (
 	ReasonPendingComponents LokiStackConditionReason = "PendingComponents"
 	// ReasonReadyComponents when all LokiStack components are ready to serve traffic.
 	ReasonReadyComponents LokiStackConditionReason = "ReadyComponents"
+	// ReasonMissingObjectStorageSecret when the required secret to store logs to object
+	// storage is missing.
+	ReasonMissingObjectStorageSecret LokiStackConditionReason = "MissingObjectStorageSecret"
+	// ReasonInvalidObjectStorageSchema when the spec contains an invalid schema(s).
+	ReasonInvalidObjectStorageSchema LokiStackConditionReason = "InvalidObjectStorageSchema"
+	// ReasonInvalidObjectStorageSecret when the format of the secret is invalid.
+	ReasonInvalidObjectStorageSecret LokiStackConditionReason = "InvalidObjectStorageSecret"
 	// ReasonZoneAwareNodesMissing when the cluster does not contain any nodes with the labels needed for zone-awareness.
 	ReasonZoneAwareNodesMissing LokiStackConditionReason = "ReasonZoneAwareNodesMissing"
 	// ReasonZoneAwareEmptyLabel when the node-label used for zone-awareness has an empty value.
-	ReasonZoneAwareEmptyLabel LokiStackConditionReason = "ReasonZoneAwareEmptyLabel"	
+	ReasonZoneAwareEmptyLabel LokiStackConditionReason = "ReasonZoneAwareEmptyLabel"
 	// ReasonStorageNeedsSchemaUpdate when the object storage schema version is older than V13
 	ReasonStorageNeedsSchemaUpdate LokiStackConditionReason = "StorageNeedsSchemaUpdate"
 )
