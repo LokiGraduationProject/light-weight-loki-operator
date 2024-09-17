@@ -44,13 +44,6 @@ type LokiStackSpec struct {
 	// +kubebuilder:validation:Required
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:io.kubernetes:StorageClass",displayName="Storage Class Name"
 	StorageClassName string `json:"storageClassName"`
-
-	// Rules defines the spec for the ruler component.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:advanced",displayName="Rules"
-	Rules *RulesSpec `json:"rules,omitempty"`
 }
 
 // LokiStackSizeType declares the type for loki cluster scale outs.
@@ -130,32 +123,6 @@ type ObjectStorageSecretSpec struct {
 //
 // +kubebuilder:validation:Enum=azure;gcs;s3;swift;alibabacloud;
 type ObjectStorageSecretType string
-
-// RulesSpec defines the spec for the ruler component.
-type RulesSpec struct {
-	// Enabled defines a flag to enable/disable the ruler component
-	//
-	// +required
-	// +kubebuilder:validation:Required
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch",displayName="Enable"
-	Enabled bool `json:"enabled"`
-
-	// A selector to select which LokiRules to mount for loading alerting/recording
-	// rules from.
-	//
-	// +optional
-	// +kubebuilder:validation:optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Selector"
-	Selector *metav1.LabelSelector `json:"selector,omitempty"`
-
-	// Namespaces to be selected for PrometheusRules discovery. If unspecified, only
-	// the same namespace as the LokiStack object is in is used.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Namespace Selector"
-	NamespaceSelector *metav1.LabelSelector `json:"namespaceSelector,omitempty"`
-}
 
 // LokiStackStatus defines the observed state of LokiStack
 type LokiStackStatus struct {

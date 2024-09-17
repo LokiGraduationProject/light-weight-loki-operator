@@ -12,11 +12,3 @@ spec:
       name: test
       type: s3
   storageClassName: standard
-  rules:
-    enabled: true
-    namespaceSelector:
-      matchLabels:
-        kubernetes.io/metadata.name: default
-    selector:
-      matchLabels:
-        jb: giho
