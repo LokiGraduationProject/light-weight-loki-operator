@@ -56,16 +56,6 @@ func CreateOrUpdateLokiStack(
 
 	ll.Info("hi")
 
-	// timeoutConfig, err := manifests.NewTimeoutConfig(stack.Spec.Limits)
-	// if err != nil {
-	// 	ll.Error(err, "failed to parse query timeout")
-	// 	return "", &status.DegradedError{
-	// 		Message: fmt.Sprintf("Error parsing query timeout: %s", err),
-	// 		Reason:  lokiv1.ReasonQueryTimeoutInvalid,
-	// 		Requeue: false,
-	// 	}
-	// }
-
 	// // Here we will translate the lokiv1.LokiStack options into manifest options
 	// opts := manifests.Options{
 	// 	Name:                   req.Name,
