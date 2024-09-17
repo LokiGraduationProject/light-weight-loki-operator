@@ -23,8 +23,9 @@ import (
 	// "github.com/grafana/loki/operator/internal/handlers/internal/serviceaccounts"
 	// "github.com/grafana/loki/operator/internal/handlers/internal/storage"
 	// "github.com/grafana/loki/operator/internal/handlers/internal/tlsprofile"
-	// "github.com/grafana/loki/operator/internal/manifests"
-	// "github.com/grafana/loki/operator/internal/status"
+	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/external/k8s"
+	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests"
+	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/status"
 )
 
 // CreateOrUpdateLokiStack handles LokiStack create and update events.
@@ -34,7 +35,6 @@ func CreateOrUpdateLokiStack(
 	req ctrl.Request,
 	k k8s.Client,
 	s *runtime.Scheme,
-	fg configv1.FeatureGates,
 ) (lokiv1.CredentialMode, error) {
 	ll := log.WithValues("lokistack", req.NamespacedName, "event", "createOrUpdate")
 
@@ -58,28 +58,14 @@ func CreateOrUpdateLokiStack(
 		gwImg = manifests.DefaultLokiStackGatewayImage
 	}
 
-	objStore, err := storage.BuildOptions(ctx, k, &stack, fg)
+	objStore, err := storage.BuildOptions(ctx, k, &stack)
 	if err != nil {
 		return "", err
 	}
 
-	baseDomain, tenants, err := gateway.BuildOptions(ctx, ll, k, &stack, fg)
+	baseDomain, tenants, err := gateway.BuildOptions(ctx, ll, k, &stack)
 	if err != nil {
 		return "", err
-	}
-
-	if err = rules.Cleanup(ctx, ll, k, &stack); err != nil {
-		return "", err
-	}
-
-	alertingRules, recordingRules, ruler, ocpOptions, err := rules.BuildOptions(ctx, ll, k, &stack)
-	if err != nil {
-		return "", err
-	}
-
-	certRotationRequiredAt := ""
-	if stack.Annotations != nil {
-		certRotationRequiredAt = stack.Annotations[manifests.AnnotationCertRotationRequiredAt]
 	}
 
 	timeoutConfig, err := manifests.NewTimeoutConfig(stack.Spec.Limits)
@@ -100,7 +86,6 @@ func CreateOrUpdateLokiStack(
 		GatewayImage:           gwImg,
 		GatewayBaseDomain:      baseDomain,
 		Stack:                  stack.Spec,
-		Gates:                  fg,
 		ObjectStorage:          objStore,
 		CertRotationRequiredAt: certRotationRequiredAt,
 		AlertingRules:          alertingRules,
@@ -116,19 +101,6 @@ func CreateOrUpdateLokiStack(
 	if optErr := manifests.ApplyDefaultSettings(&opts); optErr != nil {
 		ll.Error(optErr, "failed to conform options to build settings")
 		return "", optErr
-	}
-
-	if fg.LokiStackGateway {
-		if optErr := manifests.ApplyGatewayDefaultOptions(&opts); optErr != nil {
-			ll.Error(optErr, "failed to apply defaults options to gateway settings")
-			return "", optErr
-		}
-	}
-
-	tlsProfileType := configv1.TLSProfileType(fg.TLSProfile)
-	// Overwrite the profile from the flags and use the profile from the apiserver instead
-	if fg.OpenShift.ClusterTLSPolicy {
-		tlsProfileType = configv1.TLSProfileType("")
 	}
 
 	tlsProfile, err := tlsprofile.GetTLSSecurityProfile(ctx, k, tlsProfileType)

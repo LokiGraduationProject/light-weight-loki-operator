@@ -11,7 +11,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
-	// "github.com/grafana/loki/operator/internal/external/k8s"
+	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/external/k8s"
 )
 
 // Refresh executes an aggregate update of the LokiStack Status struct, i.e.

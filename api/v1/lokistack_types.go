@@ -97,6 +97,17 @@ type ObjectStorageSchema struct {
 // +kubebuilder:validation:Enum=v11;v12;v13
 type ObjectStorageSchemaVersion string
 
+const (
+	// ObjectStorageSchemaV11 when using v11 for the storage schema
+	ObjectStorageSchemaV11 ObjectStorageSchemaVersion = "v11"
+
+	// ObjectStorageSchemaV12 when using v12 for the storage schema
+	ObjectStorageSchemaV12 ObjectStorageSchemaVersion = "v12"
+
+	// ObjectStorageSchemaV13 when using v13 for the storage schema
+	ObjectStorageSchemaV13 ObjectStorageSchemaVersion = "v13"
+)
+
 // StorageSchemaEffectiveDate defines the type for the Storage Schema Effect Date
 //
 // +kubebuilder:validation:Pattern:="^([0-9]{4,})([-]([0-9]{2})){2}$"
@@ -213,6 +224,63 @@ type PodStatusMap map[PodStatus][]string
 
 // PodStatus is a short description of the status a Pod can be in.
 type PodStatus string
+
+const (
+	// PodPending means the pod has been accepted by the system, but one or more of the containers
+	// has not been started. This includes time before being bound to a node, as well as time spent
+	// pulling images onto the host.
+	PodPending PodStatus = "Pending"
+	// PodRunning means the pod has been bound to a node and all of the containers have been started.
+	// At least one container is still running or is in the process of being restarted.
+	PodRunning PodStatus = "Running"
+	// PodReady means the pod has been started and the readiness probe reports a successful status.
+	PodReady PodStatus = "Ready"
+	// PodFailed means that all containers in the pod have terminated, and at least one container has
+	// terminated in a failure (exited with a non-zero exit code or was stopped by the system).
+	PodFailed PodStatus = "Failed"
+	// PodStatusUnknown is used when none of the other statuses apply or the information is not ready yet.
+	PodStatusUnknown PodStatus = "Unknown"
+)
+
+// LokiStackConditionType deifnes the type of condition types of a Loki deployment.
+type LokiStackConditionType string
+
+const (
+	// ConditionReady defines the condition that all components in the Loki deployment are ready.
+	ConditionReady LokiStackConditionType = "Ready"
+
+	// ConditionPending defines the condition that some or all components are in pending state.
+	ConditionPending LokiStackConditionType = "Pending"
+
+	// ConditionFailed defines the condition that components in the Loki deployment failed to roll out.
+	ConditionFailed LokiStackConditionType = "Failed"
+
+	// ConditionDegraded defines the condition that some or all components in the Loki deployment
+	// are degraded or the cluster cannot connect to object storage.
+	ConditionDegraded LokiStackConditionType = "Degraded"
+
+	// ConditionWarning is used for configurations that are not recommended, but don't currently cause
+	// issues. There can be multiple warning conditions active at a time.
+	ConditionWarning LokiStackConditionType = "Warning"
+)
+
+// LokiStackConditionReason defines the type for valid reasons of a Loki deployment conditions.
+type LokiStackConditionReason string
+
+const (
+	// ReasonFailedComponents when all/some LokiStack components fail to roll out.
+	ReasonFailedComponents LokiStackConditionReason = "FailedComponents"
+	// ReasonPendingComponents when all/some LokiStack components pending dependencies
+	ReasonPendingComponents LokiStackConditionReason = "PendingComponents"
+	// ReasonReadyComponents when all LokiStack components are ready to serve traffic.
+	ReasonReadyComponents LokiStackConditionReason = "ReadyComponents"
+	// ReasonZoneAwareNodesMissing when the cluster does not contain any nodes with the labels needed for zone-awareness.
+	ReasonZoneAwareNodesMissing LokiStackConditionReason = "ReasonZoneAwareNodesMissing"
+	// ReasonZoneAwareEmptyLabel when the node-label used for zone-awareness has an empty value.
+	ReasonZoneAwareEmptyLabel LokiStackConditionReason = "ReasonZoneAwareEmptyLabel"	
+	// ReasonStorageNeedsSchemaUpdate when the object storage schema version is older than V13
+	ReasonStorageNeedsSchemaUpdate LokiStackConditionReason = "StorageNeedsSchemaUpdate"
+)
 
 // LokiStackStorageStatus defines the observed state of
 // the Loki storage configuration.
