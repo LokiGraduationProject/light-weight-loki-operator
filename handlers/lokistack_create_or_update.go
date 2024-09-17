@@ -16,7 +16,6 @@ import (
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
 	// "github.com/grafana/loki/operator/internal/external/k8s"
 	// "github.com/grafana/loki/operator/internal/handlers/internal/gateway"
-	// "github.com/grafana/loki/operator/internal/handlers/internal/rules"
 	// "github.com/grafana/loki/operator/internal/handlers/internal/serviceaccounts"
 	// "github.com/grafana/loki/operator/internal/handlers/internal/tlsprofile"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/external/k8s"
@@ -56,22 +55,21 @@ func CreateOrUpdateLokiStack(
 
 	ll.Info("hi")
 
-	// // Here we will translate the lokiv1.LokiStack options into manifest options
-	// opts := manifests.Options{
-	// 	Name:                   req.Name,
-	// 	Namespace:              req.Namespace,
-	// 	Image:                  img,
-	// 	Stack:                  stack.Spec,
-	// 	ObjectStorage:          objStore,
-	// 	Timeouts:               timeoutConfig,
-	// }
+	// Here we will translate the lokiv1.LokiStack options into manifest options
+	opts := manifests.Options{
+		Name:          req.Name,
+		Namespace:     req.Namespace,
+		Image:         img,
+		Stack:         stack.Spec,
+		ObjectStorage: objStore,
+	}
 
-	// ll.Info("begin building manifests")
+	ll.Info("begin building manifests")
 
-	// if optErr := manifests.ApplyDefaultSettings(&opts); optErr != nil {
-	// 	ll.Error(optErr, "failed to conform options to build settings")
-	// 	return "", optErr
-	// }
+	if optErr := manifests.ApplyDefaultSettings(&opts); optErr != nil {
+		ll.Error(optErr, "failed to conform options to build settings")
+		return "", optErr
+	}
 
 	// objects, err := manifests.BuildAll(opts)
 	// if err != nil {

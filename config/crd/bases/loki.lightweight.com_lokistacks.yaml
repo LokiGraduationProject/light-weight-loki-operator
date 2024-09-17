@@ -33,6 +33,109 @@ spec:
             type: object
           spec:
             properties:
+              limits:
+                description: Limits defines the limits to be applied to log stream
+                  processing.
+                properties:
+                  global:
+                    description: Global defines the limits applied globally across
+                      the cluster.
+                    properties:
+                      ingestion:
+                        description: IngestionLimits defines the limits applied on
+                          ingested log streams.
+                        properties:
+                          ingestionBurstSize:
+                            description: IngestionBurstSize defines the local rate-limited
+                              sample size per distributor replica. It should be set
+                              to the set at least to the maximum logs size expected
+                              in a single push request.
+                            format: int32
+                            type: integer
+                          ingestionRate:
+                            description: IngestionRate defines the sample size per
+                              second. Units MB.
+                            format: int32
+                            type: integer
+                          maxGlobalStreamsPerTenant:
+                            description: MaxGlobalStreamsPerTenant defines the maximum
+                              number of active streams per tenant, across the cluster.
+                            format: int32
+                            type: integer
+                          maxLabelNameLength:
+                            description: MaxLabelNameLength defines the maximum number
+                              of characters allowed for label keys in log streams.
+                            format: int32
+                            type: integer
+                          maxLabelNamesPerSeries:
+                            description: MaxLabelNamesPerSeries defines the maximum
+                              number of label names per series in each log stream.
+                            format: int32
+                            type: integer
+                          maxLabelValueLength:
+                            description: MaxLabelValueLength defines the maximum number
+                              of characters allowed for label values in log streams.
+                            format: int32
+                            type: integer
+                          maxLineSize:
+                            description: MaxLineSize defines the maximum line size
+                              on ingestion path. Units in Bytes.
+                            format: int32
+                            type: integer
+                          perStreamDesiredRate:
+                            description: PerStreamDesiredRate defines the desired
+                              ingestion rate per second that LokiStack should target
+                              applying automatic stream sharding. Units MB.
+                            format: int32
+                            type: integer
+                          perStreamRateLimit:
+                            description: PerStreamRateLimit defines the maximum byte
+                              rate per second per stream. Units MB.
+                            format: int32
+                            type: integer
+                          perStreamRateLimitBurst:
+                            description: PerStreamRateLimitBurst defines the maximum
+                              burst bytes per stream. Units MB.
+                            format: int32
+                            type: integer
+                        type: object
+                      queries:
+                        description: QueryLimits defines the limit applied on querying
+                          log streams.
+                        properties:
+                          cardinalityLimit:
+                            description: CardinalityLimit defines the cardinality
+                              limit for index queries.
+                            format: int32
+                            type: integer
+                          maxChunksPerQuery:
+                            description: MaxChunksPerQuery defines the maximum number
+                              of chunks that can be fetched by a single query.
+                            format: int32
+                            type: integer
+                          maxEntriesLimitPerQuery:
+                            description: MaxEntriesLimitsPerQuery defines the maximum
+                              number of log entries that will be returned for a query.
+                            format: int32
+                            type: integer
+                          maxQuerySeries:
+                            description: MaxQuerySeries defines the maximum of unique
+                              series that is returned by a metric query.
+                            format: int32
+                            type: integer
+                          maxVolumeSeries:
+                            description: MaxVolumeSeries defines the maximum number
+                              of aggregated series in a log-volume response
+                            format: int32
+                            type: integer
+                          queryTimeout:
+                            default: 3m
+                            description: Timeout when querying ingesters or storage
+                              during the execution of a query request.
+                            type: string
+                        type: object
+                    type: object
+                type: object
               size:
                 description: Size defines one of the support Loki deployment scale
                   out sizes.
@@ -108,6 +211,84 @@ spec:
                 description: Storage class name defines the storage class for ingester/querier
                   PVCs.
                 type: string
+              template:
+                description: Template defines the resource per component.
+                properties:
+                  compactor:
+                    description: Compactor defines the compaction component spec.
+                    properties:
+                      replicas:
+                        description: Replicas defines the number of replica pods of
+                          the component.
+                        format: int32
+                        type: integer
+                    type: object
+                  distributor:
+                    description: Distributor defines the distributor component spec.
+                    properties:
+                      replicas:
+                        description: Replicas defines the number of replica pods of
+                          the component.
+                        format: int32
+                        type: integer
+                    type: object
+                  gateway:
+                    description: Gateway defines the lokistack gateway component spec.
+                    properties:
+                      replicas:
+                        description: Replicas defines the number of replica pods of
+                          the component.
+                        format: int32
+                        type: integer
+                    type: object
+                  indexGateway:
+                    description: IndexGateway defines the index gateway component
+                      spec.
+                    properties:
+                      replicas:
+                        description: Replicas defines the number of replica pods of
+                          the component.
+                        format: int32
+                        type: integer
+                    type: object
+                  ingester:
+                    description: Ingester defines the ingester component spec.
+                    properties:
+                      replicas:
+                        description: Replicas defines the number of replica pods of
+                          the component.
+                        format: int32
+                        type: integer
+                    type: object
+                  querier:
+                    description: Querier defines the querier component spec.
+                    properties:
+                      replicas:
+                        description: Replicas defines the number of replica pods of
+                          the component.
+                        format: int32
+                        type: integer
+                    type: object
+                  queryFrontend:
+                    description: QueryFrontend defines the query frontend component
+                      spec.
+                    properties:
+                      replicas:
+                        description: Replicas defines the number of replica pods of
+                          the component.
+                        format: int32
+                        type: integer
+                    type: object
+                  ruler:
+                    description: Ruler defines the ruler component spec.
+                    properties:
+                      replicas:
+                        description: Replicas defines the number of replica pods of
+                          the component.
+                        format: int32
+                        type: integer
+                    type: object
+                type: object
             required:
             - size
             - storage
