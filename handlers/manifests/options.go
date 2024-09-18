@@ -1,8 +1,11 @@
 package manifests
 
 import (
+	"time"
+
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal"
+	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/storage"
 )
 
@@ -20,5 +23,30 @@ type Options struct {
 	Stack                lokiv1.LokiStackSpec
 	ResourceRequirements internal.ComponentResources
 
+	Timeouts TimeoutConfig
+
 	ObjectStorage storage.Options
+}
+
+// TimeoutConfig contains the server configuration options for all Loki components
+type TimeoutConfig struct {
+	Loki config.HTTPTimeoutConfig
+}
+
+func calculateHTTPTimeouts(queryTimeout time.Duration) TimeoutConfig {
+	idleTimeout := lokiDefaultHTTPIdleTimeout
+	if queryTimeout < idleTimeout {
+		idleTimeout = queryTimeout
+	}
+
+	readTimeout := queryTimeout / 10
+	writeTimeout := queryTimeout + lokiQueryWriteDuration
+
+	return TimeoutConfig{
+		Loki: config.HTTPTimeoutConfig{
+			IdleTimeout:  idleTimeout,
+			ReadTimeout:  readTimeout,
+			WriteTimeout: writeTimeout,
+		},
+	}
 }

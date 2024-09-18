@@ -5,6 +5,7 @@ import (
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal"
 	"github.com/ViaQ/logerr/kverrors"
 	"github.com/imdario/mergo"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // BuildAll builds all manifests required to run a Loki Stack
@@ -34,30 +35,29 @@ func BuildAll(opts Options) ([]client.Object, error) {
 		return nil, err
 	}
 
-	compactorObjs, err := BuildCompactor(opts)
-	if err != nil {
-		return nil, err
-	}
+	// compactorObjs, err := BuildCompactor(opts)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	queryFrontendObjs, err := BuildQueryFrontend(opts)
-	if err != nil {
-		return nil, err
-	}
+	// queryFrontendObjs, err := BuildQueryFrontend(opts)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	indexGatewayObjs, err := BuildIndexGateway(opts)
-	if err != nil {
-		return nil, err
-	}
+	// indexGatewayObjs, err := BuildIndexGateway(opts)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	res = append(res, cm)
 	res = append(res, sa)
 	res = append(res, distributorObjs...)
 	res = append(res, ingesterObjs...)
 	res = append(res, querierObjs...)
-	res = append(res, compactorObjs...)
-	res = append(res, queryFrontendObjs...)
-	res = append(res, indexGatewayObjs...)
-	res = append(res, BuildLokiGossipRingService(opts.Name))
+	// res = append(res, compactorObjs...)
+	// res = append(res, queryFrontendObjs...)
+	// res = append(res, indexGatewayObjs...)
 
 	return res, nil
 }

@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -58,6 +59,10 @@ type LokiStackSpec struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:advanced",displayName="Rate Limiting"
 	Limits *LimitsSpec `json:"limits,omitempty"`
+
+	// When DefaultNodeAffinity is enabled the operator will set a default node affinity on all pods.
+	// This will limit scheduling of the pods to Nodes with Linux.
+	DefaultNodeAffinity bool `json:"defaultNodeAffinity,omitempty"`
 }
 
 // LokiStackSizeType declares the type for loki cluster scale outs.
@@ -299,6 +304,28 @@ type LokiComponentSpec struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:hidden"
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// NodeSelector defines the labels required by a node to schedule
+	// the component onto it.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// Tolerations defines the tolerations required by a node to schedule
+	// the component onto it.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+
+	// PodAntiAffinity defines the pod anti affinity scheduling rules to schedule pods
+	// of a component.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podAntiAffinity",displayName="PodAntiAffinity"
+	PodAntiAffinity *corev1.PodAntiAffinity `json:"podAntiAffinity,omitempty"`
 }
 
 // LokiTemplateSpec defines the template of all requirements to configure

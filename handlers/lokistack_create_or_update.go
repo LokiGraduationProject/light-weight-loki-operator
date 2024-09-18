@@ -71,7 +71,8 @@ func CreateOrUpdateLokiStack(
 		return "", optErr
 	}
 
-	objects, err := manifests.BuildAll(opts)
+	// objects, err := manifests.BuildAll(opts)
+	manifests.BuildAll(opts)
 	if err != nil {
 		ll.Error(err, "failed to build manifests")
 		return "", err
