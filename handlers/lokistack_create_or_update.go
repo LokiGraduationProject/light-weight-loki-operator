@@ -71,11 +71,11 @@ func CreateOrUpdateLokiStack(
 		return "", optErr
 	}
 
-	// objects, err := manifests.BuildAll(opts)
-	// if err != nil {
-	// 	ll.Error(err, "failed to build manifests")
-	// 	return "", err
-	// }
+	objects, err := manifests.BuildAll(opts)
+	if err != nil {
+		ll.Error(err, "failed to build manifests")
+		return "", err
+	}
 
 	// // The status is updated before the objects are actually created to
 	// // avoid the scenario in which the configmap is successfully created or
