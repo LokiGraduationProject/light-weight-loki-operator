@@ -4,32 +4,41 @@ import (
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal"
 	"github.com/ViaQ/logerr/kverrors"
+	"github.com/go-logr/logr"
 	"github.com/imdario/mergo"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // BuildAll builds all manifests required to run a Loki Stack
-func BuildAll(opts Options) ([]client.Object, error) {
+func BuildAll(opts Options, log logr.Logger) ([]client.Object, error) {
+	ll := log.WithValues("lokistack", "default", "event", "BuildAll")
+
+	ll.Info("B")
 	res := make([]client.Object, 0)
 
+	ll.Info("C")
 	sa := BuildServiceAccount(opts)
 
-	cm, sha1C, mapErr := LokiConfigMap(opts)
+	ll.Info("D")
+	cm, sha1C, mapErr := LokiConfigMap(opts, log)
 	if mapErr != nil {
 		return nil, mapErr
 	}
 	opts.ConfigSHA1 = sha1C
 
-	distributorObjs, err := BuildDistributor(opts)
+	ll.Info("E")
+	distributorObjs, err := BuildDistributor(opts, log)
 	if err != nil {
 		return nil, err
 	}
 
+	ll.Info("F")
 	ingesterObjs, err := BuildIngester(opts)
 	if err != nil {
 		return nil, err
 	}
 
+	ll.Info("G")
 	querierObjs, err := BuildQuerier(opts)
 	if err != nil {
 		return nil, err
@@ -81,6 +90,21 @@ func ApplyDefaultSettings(opts *Options) error {
 	strictOverrides := lokiv1.LokiStackSpec{
 		Template: &lokiv1.LokiTemplateSpec{
 			Compactor: &lokiv1.LokiComponentSpec{
+				// Compactor is a singelton application.
+				// Only one replica allowed!!!
+				Replicas: 1,
+			},
+			Distributor: &lokiv1.LokiComponentSpec{
+				// Compactor is a singelton application.
+				// Only one replica allowed!!!
+				Replicas: 1,
+			},
+			Ingester: &lokiv1.LokiComponentSpec{
+				// Compactor is a singelton application.
+				// Only one replica allowed!!!
+				Replicas: 1,
+			},
+			Querier: &lokiv1.LokiComponentSpec{
 				// Compactor is a singelton application.
 				// Only one replica allowed!!!
 				Replicas: 1,

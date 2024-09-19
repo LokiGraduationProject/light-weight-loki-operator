@@ -21,6 +21,8 @@ import (
 	"flag"
 	"os"
 
+	"github.com/ViaQ/logerr/v2/log"
+
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -52,6 +54,7 @@ func init() {
 }
 
 func main() {
+	logger := log.NewLogger("loki-operator")
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
@@ -125,6 +128,7 @@ func main() {
 	if err = (&controller.LokiStackReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Log:    logger.WithName("controllers").WithName("lokistack"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "LokiStack")
 		os.Exit(1)

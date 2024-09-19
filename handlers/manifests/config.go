@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 
+	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -12,23 +13,25 @@ import (
 )
 
 // LokiConfigMap creates the single configmap containing the loki configuration for the whole cluster
-func LokiConfigMap(opt Options) (*corev1.ConfigMap, string, error) {
+func LokiConfigMap(opt Options, log logr.Logger) (*corev1.ConfigMap, string, error) {
+	ll := log.WithValues("lokistack", "default", "event", "BuildAll")
+	ll.Info("1")
 	cfg := ConfigOptions(opt)
 
-	c, rc, err := config.Build(cfg)
+	ll.Info("2")
+	c, err := config.Build(cfg)
 	if err != nil {
+		ll.Error(err, "hi")
 		return nil, "", err
 	}
 
+	ll.Info("3")
 	s := sha1.New()
 	_, err = s.Write(c)
 	if err != nil {
 		return nil, "", err
 	}
-	_, err = s.Write(rc)
-	if err != nil {
-		return nil, "", err
-	}
+
 	sha1C := fmt.Sprintf("%x", s.Sum(nil))
 
 	return &corev1.ConfigMap{
@@ -41,8 +44,7 @@ func LokiConfigMap(opt Options) (*corev1.ConfigMap, string, error) {
 			Labels: commonLabels(opt.Name),
 		},
 		Data: map[string]string{
-			config.LokiConfigFileName:        string(c),
-			config.LokiRuntimeConfigFileName: string(rc),
+			config.LokiConfigFileName: string(c),
 		},
 	}, sha1C, nil
 }

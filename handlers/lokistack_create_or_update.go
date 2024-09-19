@@ -53,8 +53,6 @@ func CreateOrUpdateLokiStack(
 		return "", err
 	}
 
-	ll.Info("hi")
-
 	// Here we will translate the lokiv1.LokiStack options into manifest options
 	opts := manifests.Options{
 		Name:          req.Name,
@@ -72,7 +70,7 @@ func CreateOrUpdateLokiStack(
 	}
 
 	// objects, err := manifests.BuildAll(opts)
-	manifests.BuildAll(opts)
+	manifests.BuildAll(opts, log)
 	if err != nil {
 		ll.Error(err, "failed to build manifests")
 		return "", err

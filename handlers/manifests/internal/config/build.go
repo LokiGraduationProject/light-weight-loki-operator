@@ -31,26 +31,28 @@ var (
 )
 
 // Build builds a loki stack configuration files
-func Build(opts Options) ([]byte, []byte, error) {
+func Build(opts Options) ([]byte, error) {
 	// Build loki config yaml
 	w := bytes.NewBuffer(nil)
 	err := lokiConfigYAMLTmpl.Execute(w, opts)
 	if err != nil {
-		return nil, nil, kverrors.Wrap(err, "failed to create loki configuration")
+		return nil, kverrors.Wrap(err, "failed to create loki configuration")
 	}
 	cfg, err := io.ReadAll(w)
 	if err != nil {
-		return nil, nil, kverrors.Wrap(err, "failed to read configuration from buffer")
+		return nil, kverrors.Wrap(err, "failed to read configuration from buffer")
 	}
-	// Build loki runtime config yaml
-	w = bytes.NewBuffer(nil)
-	err = lokiRuntimeConfigYAMLTmpl.Execute(w, opts)
-	if err != nil {
-		return nil, nil, kverrors.Wrap(err, "failed to create loki runtime configuration")
-	}
-	rcfg, err := io.ReadAll(w)
-	if err != nil {
-		return nil, nil, kverrors.Wrap(err, "failed to read configuration from buffer")
-	}
-	return cfg, rcfg, nil
+	// // Build loki runtime config yaml
+	// // TODO: FOUNDED ERROR!!!!
+	// w = bytes.NewBuffer(nil)
+	// err = lokiRuntimeConfigYAMLTmpl.Execute(w, opts)
+	// if err != nil {
+	// 	// return nil, nil, kverrors.Wrap(err, "failed to create loki runtime configuration")
+	// 	return nil, nil, err
+	// }
+	// rcfg, err := io.ReadAll(w)
+	// if err != nil {
+	// 	return nil, nil, kverrors.Wrap(err, "failed to read configuration from buffer")
+	// }
+	return cfg, nil
 }

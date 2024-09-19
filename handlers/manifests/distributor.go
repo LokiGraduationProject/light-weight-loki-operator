@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/go-logr/logr"
+
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -15,8 +17,8 @@ import (
 )
 
 // BuildDistributor returns a list of k8s objects for Loki Distributor
-func BuildDistributor(opts Options) ([]client.Object, error) {
-	deployment := NewDistributorDeployment(opts)
+func BuildDistributor(opts Options, log logr.Logger) ([]client.Object, error) {
+	deployment := NewDistributorDeployment(opts, log)
 
 	return []client.Object{
 		deployment,
@@ -26,12 +28,16 @@ func BuildDistributor(opts Options) ([]client.Object, error) {
 }
 
 // NewDistributorDeployment creates a deployment object for a distributor
-func NewDistributorDeployment(opts Options) *appsv1.Deployment {
+func NewDistributorDeployment(opts Options, log logr.Logger) *appsv1.Deployment {
+	ll := log.WithValues("lokistack", "default", "event", "distributor")
+
 	l := ComponentLabels(LabelDistributorComponent, opts.Name)
 	a := commonAnnotations(opts)
+	ll.Info(LabelDistributorComponent)
+	ll.Info(opts.Name)
+	// ll.Info(opts.Stack.DefaultNodeAffinity)
 	podSpec := corev1.PodSpec{
 		ServiceAccountName: opts.Name,
-		Affinity:           configureAffinity(LabelDistributorComponent, opts.Name, opts.Stack.DefaultNodeAffinity, opts.Stack.Template.Distributor),
 		Volumes: []corev1.Volume{
 			{
 				Name: "config",

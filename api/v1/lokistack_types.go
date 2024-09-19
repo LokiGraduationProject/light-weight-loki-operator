@@ -59,10 +59,6 @@ type LokiStackSpec struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:advanced",displayName="Rate Limiting"
 	Limits *LimitsSpec `json:"limits,omitempty"`
-
-	// When DefaultNodeAffinity is enabled the operator will set a default node affinity on all pods.
-	// This will limit scheduling of the pods to Nodes with Linux.
-	DefaultNodeAffinity bool `json:"defaultNodeAffinity,omitempty"`
 }
 
 // LokiStackSizeType declares the type for loki cluster scale outs.

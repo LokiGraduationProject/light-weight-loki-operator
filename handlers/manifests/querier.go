@@ -38,7 +38,6 @@ func NewQuerierDeployment(opts Options) *appsv1.Deployment {
 	a := commonAnnotations(opts)
 	podSpec := corev1.PodSpec{
 		ServiceAccountName: opts.Name,
-		Affinity:           configureAffinity(LabelQuerierComponent, opts.Name, opts.Stack.DefaultNodeAffinity, opts.Stack.Template.Querier),
 		Volumes: []corev1.Volume{
 			{
 				Name: configVolumeName,
