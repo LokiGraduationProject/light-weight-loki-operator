@@ -54,6 +54,8 @@ const (
 	kubernetesComponentLabel = "app.kubernetes.io/component"
 	kubernetesInstanceLabel  = "app.kubernetes.io/instance"
 
+	lokiFrontendContainerName = "loki-query-frontend"
+
 	kubernetesNodeOSLabel       = "kubernetes.io/os"
 	kubernetesNodeOSLinux       = "linux"
 	kubernetesNodeHostnameLabel = "kubernetes.io/hostname"
