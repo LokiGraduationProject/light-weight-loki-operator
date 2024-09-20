@@ -10,6 +10,7 @@ import (
 	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -18,6 +19,18 @@ import (
 // BuildIndexGateway returns a list of k8s objects for Loki IndexGateway
 func BuildIndexGateway(opts Options) ([]client.Object, error) {
 	statefulSet := NewIndexGatewayStatefulSet(opts)
+
+	if err := configureHashRingEnv(&statefulSet.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureProxyEnv(&statefulSet.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureReplication(&statefulSet.Spec.Template, opts.Stack.Replication, LabelIndexGatewayComponent, opts.Name); err != nil {
+		return nil, err
+	}
 
 	return []client.Object{
 		statefulSet,
@@ -112,12 +125,12 @@ func NewIndexGatewayStatefulSet(opts Options) *appsv1.StatefulSet {
 			RevisionHistoryLimit: ptr.To(defaultRevHistoryLimit),
 			Replicas:             ptr.To(opts.Stack.Template.IndexGateway.Replicas),
 			Selector: &metav1.LabelSelector{
-				MatchLabels: l,
+				MatchLabels: labels.Merge(l, GossipLabels()),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        fmt.Sprintf("loki-index-gateway-%s", opts.Name),
-					Labels:      l,
+					Labels:      labels.Merge(l, GossipLabels()),
 					Annotations: a,
 				},
 				Spec: podSpec,

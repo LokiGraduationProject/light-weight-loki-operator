@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
 	appsv1 "k8s.io/api/apps/v1"
@@ -20,8 +21,21 @@ import (
 func BuildDistributor(opts Options, log logr.Logger) ([]client.Object, error) {
 	deployment := NewDistributorDeployment(opts, log)
 
+	if err := configureHashRingEnv(&deployment.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureProxyEnv(&deployment.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureReplication(&deployment.Spec.Template, opts.Stack.Replication, LabelDistributorComponent, opts.Name); err != nil {
+		return nil, err
+	}
+
 	return []client.Object{
 		deployment,
+		NewDistributorGRPCService(opts),
 		NewDistributorHTTPService(opts),
 		newDistributorPodDisruptionBudget(opts),
 	}, nil
@@ -73,6 +87,16 @@ func NewDistributorDeployment(opts Options, log logr.Logger) *appsv1.Deployment 
 						ContainerPort: httpPort,
 						Protocol:      protocolTCP,
 					},
+					{
+						Name:          lokiGRPCPortName,
+						ContainerPort: grpcPort,
+						Protocol:      protocolTCP,
+					},
+					{
+						Name:          lokiGossipPortName,
+						ContainerPort: gossipPort,
+						Protocol:      protocolTCP,
+					},
 				},
 				VolumeMounts: []corev1.VolumeMount{
 					{
@@ -105,12 +129,12 @@ func NewDistributorDeployment(opts Options, log logr.Logger) *appsv1.Deployment 
 		Spec: appsv1.DeploymentSpec{
 			Replicas: ptr.To(opts.Stack.Template.Distributor.Replicas),
 			Selector: &metav1.LabelSelector{
-				MatchLabels: l,
+				MatchLabels: labels.Merge(l, GossipLabels()),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        fmt.Sprintf("loki-distributor-%s", opts.Name),
-					Labels:      l,
+					Labels:      labels.Merge(l, GossipLabels()),
 					Annotations: a,
 				},
 				Spec: podSpec,
@@ -118,6 +142,35 @@ func NewDistributorDeployment(opts Options, log logr.Logger) *appsv1.Deployment 
 			Strategy: appsv1.DeploymentStrategy{
 				Type: appsv1.RollingUpdateDeploymentStrategyType,
 			},
+		},
+	}
+}
+
+// NewDistributorGRPCService creates a k8s service for the distributor GRPC endpoint
+func NewDistributorGRPCService(opts Options) *corev1.Service {
+	serviceName := serviceNameDistributorGRPC(opts.Name)
+	labels := ComponentLabels(LabelDistributorComponent, opts.Name)
+
+	return &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   serviceName,
+			Labels: labels,
+		},
+		Spec: corev1.ServiceSpec{
+			ClusterIP: "None",
+			Ports: []corev1.ServicePort{
+				{
+					Name:       lokiGRPCPortName,
+					Port:       grpcPort,
+					Protocol:   protocolTCP,
+					TargetPort: intstr.IntOrString{IntVal: grpcPort},
+				},
+			},
+			Selector: labels,
 		},
 	}
 }

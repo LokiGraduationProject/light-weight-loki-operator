@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,6 +21,14 @@ func BuildCompactor(opts Options) ([]client.Object, error) {
 	statefulSet := NewCompactorStatefulSet(opts)
 
 	if err := storage.ConfigureStatefulSet(statefulSet, opts.ObjectStorage); err != nil {
+		return nil, err
+	}
+
+	if err := configureHashRingEnv(&statefulSet.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureProxyEnv(&statefulSet.Spec.Template.Spec, opts); err != nil {
 		return nil, err
 	}
 
@@ -115,12 +124,12 @@ func NewCompactorStatefulSet(opts Options) *appsv1.StatefulSet {
 			RevisionHistoryLimit: ptr.To(defaultRevHistoryLimit),
 			Replicas:             ptr.To(opts.Stack.Template.Compactor.Replicas),
 			Selector: &metav1.LabelSelector{
-				MatchLabels: l,
+				MatchLabels: labels.Merge(l, GossipLabels()),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        fmt.Sprintf("loki-compactor-%s", opts.Name),
-					Labels:      l,
+					Labels:      labels.Merge(l, GossipLabels()),
 					Annotations: a,
 				},
 				Spec: podSpec,

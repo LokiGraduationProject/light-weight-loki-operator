@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path"
 
+	"k8s.io/apimachinery/pkg/labels"
+
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/storage"
 	appsv1 "k8s.io/api/apps/v1"
@@ -21,6 +23,18 @@ func BuildIngester(opts Options) ([]client.Object, error) {
 	statefulSet := NewIngesterStatefulSet(opts)
 
 	if err := storage.ConfigureStatefulSet(statefulSet, opts.ObjectStorage); err != nil {
+		return nil, err
+	}
+
+	if err := configureHashRingEnv(&statefulSet.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureProxyEnv(&statefulSet.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureReplication(&statefulSet.Spec.Template, opts.Stack.Replication, LabelIngesterComponent, opts.Name); err != nil {
 		return nil, err
 	}
 
@@ -78,6 +92,11 @@ func NewIngesterStatefulSet(opts Options) *appsv1.StatefulSet {
 						ContainerPort: grpcPort,
 						Protocol:      protocolTCP,
 					},
+					{
+						Name:          lokiGossipPortName,
+						ContainerPort: gossipPort,
+						Protocol:      protocolTCP,
+					},
 				},
 				VolumeMounts: []corev1.VolumeMount{
 					{
@@ -117,12 +136,12 @@ func NewIngesterStatefulSet(opts Options) *appsv1.StatefulSet {
 			RevisionHistoryLimit: ptr.To(defaultRevHistoryLimit),
 			Replicas:             ptr.To(opts.Stack.Template.Ingester.Replicas),
 			Selector: &metav1.LabelSelector{
-				MatchLabels: l,
+				MatchLabels: labels.Merge(l, GossipLabels()),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        fmt.Sprintf("loki-ingester-%s", opts.Name),
-					Labels:      l,
+					Labels:      labels.Merge(l, GossipLabels()),
 					Annotations: a,
 				},
 				Spec: podSpec,

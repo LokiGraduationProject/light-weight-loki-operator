@@ -21,6 +21,24 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	// The AnnotationDisableTenantValidation annotation can contain a boolean value that, if true, disables the tenant-ID validation.
+	AnnotationDisableTenantValidation = "loki.grafana.com/disable-tenant-validation"
+
+	// The AnnotationAvailabilityZone annotation contains the availability zone used in the Loki configuration of that pod.
+	// It is automatically added to managed Pods by the operator, if needed.
+	AnnotationAvailabilityZone = "loki.grafana.com/availability-zone"
+
+	// The AnnotationAvailabilityZoneLabels annotation contains a list of node-labels that are used to construct the availability zone
+	// of the annotated Pod. It is used by the zone-awareness controller and automatically added to managed Pods by the operator,
+	// if needed.
+	AnnotationAvailabilityZoneLabels string = "loki.grafana.com/availability-zone-labels"
+
+	// LabelZoneAwarePod is a pod-label that is added to Pods that should be reconciled by the zone-awareness controller.
+	// It is automatically added to managed Pods by the operator, if needed.
+	LabelZoneAwarePod string = "loki.grafana.com/zone-aware"
+)
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -59,6 +77,112 @@ type LokiStackSpec struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:advanced",displayName="Rate Limiting"
 	Limits *LimitsSpec `json:"limits,omitempty"`
+
+	// Proxy defines the spec for the object proxy to configure cluster proxy information.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Cluster Proxy"
+	Proxy *ClusterProxy `json:"proxy,omitempty"`
+
+	// HashRing defines the spec for the distributed hash ring configuration.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:advanced",displayName="Hash Ring"
+	HashRing *HashRingSpec `json:"hashRing,omitempty"`
+
+	// Replication defines the configuration for Loki data replication.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Replication Spec"
+	Replication *ReplicationSpec `json:"replication,omitempty"`
+}
+
+// HashRingSpec defines the hash ring configuration
+type HashRingSpec struct {
+	// Type of hash ring implementation that should be used
+	//
+	// +required
+	// +kubebuilder:validation:Required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:select:memberlist"},displayName="Type"
+	// +kubebuilder:default:=memberlist
+	Type HashRingType `json:"type"`
+
+	// MemberList configuration spec
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Memberlist Config"
+	MemberList *MemberListSpec `json:"memberlist,omitempty"`
+}
+
+const (
+	// HashRingMemberList when using memberlist for the distributed hash ring.
+	HashRingMemberList HashRingType = "memberlist"
+)
+
+// MemberListSpec defines the configuration for the memberlist based hash ring.
+type MemberListSpec struct {
+	// InstanceAddrType defines the type of address to use to advertise to the ring.
+	// Defaults to the first address from any private network interfaces of the current pod.
+	// Alternatively the public pod IP can be used in case private networks (RFC 1918 and RFC 6598)
+	// are not available.
+	//
+	// +optional
+	// +kubebuilder:validation:optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:select:default","urn:alm:descriptor:com.tectonic.ui:select:podIP"},displayName="Instance Address"
+	InstanceAddrType InstanceAddrType `json:"instanceAddrType,omitempty"`
+
+	// EnableIPv6 enables IPv6 support for the memberlist based hash ring.
+	//
+	// Currently this also forces the instanceAddrType to podIP to avoid local address lookup
+	// for the memberlist.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch",displayName="Enable IPv6"
+	EnableIPv6 bool `json:"enableIPv6,omitempty"`
+}
+
+const (
+	// InstanceAddrDefault when using the first from any private network interfaces (RFC 1918 and RFC 6598).
+	InstanceAddrDefault InstanceAddrType = "default"
+	// InstanceAddrPodIP when using the public pod IP from the cluster's pod network.
+	InstanceAddrPodIP InstanceAddrType = "podIP"
+)
+
+// InstanceAddrType defines the type of pod network to use for advertising IPs to the ring.
+//
+// +kubebuilder:validation:Enum=default;podIP
+type InstanceAddrType string
+
+// HashRingType defines the type of hash ring which can be used with the Loki cluster.
+//
+// +kubebuilder:validation:Enum=memberlist
+type HashRingType string
+
+// ClusterProxy is the Proxy configuration when the cluster is behind a Proxy.
+type ClusterProxy struct {
+	// HTTPProxy configures the HTTP_PROXY/http_proxy env variable.
+	//
+	// +optional
+	// +kubebuilder:validation:optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="HTTPProxy"
+	HTTPProxy string `json:"httpProxy,omitempty"`
+	// HTTPSProxy configures the HTTPS_PROXY/https_proxy env variable.
+	//
+	// +optional
+	// +kubebuilder:validation:optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="HTTPSProxy"
+	HTTPSProxy string `json:"httpsProxy,omitempty"`
+	// NoProxy configures the NO_PROXY/no_proxy env variable.
+	//
+	// +optional
+	// +kubebuilder:validation:optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="NoProxy"
+	NoProxy string `json:"noProxy,omitempty"`
 }
 
 // LokiStackSizeType declares the type for loki cluster scale outs.
@@ -601,6 +725,41 @@ type QueryLimitSpec struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:number",displayName="Max Volume Series"
 	MaxVolumeSeries int32 `json:"maxVolumeSeries,omitempty"`
+}
+
+type ReplicationSpec struct {
+	// Factor defines the policy for log stream replication.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum:=1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:number",displayName="Replication Factor"
+	Factor int32 `json:"factor,omitempty"`
+
+	// Zones defines an array of ZoneSpec that the scheduler will try to satisfy.
+	// IMPORTANT: Make sure that the replication factor defined is less than or equal to the number of available zones.
+	//
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Zones Spec"
+	Zones []ZoneSpec `json:"zones,omitempty"`
+}
+
+// ZoneSpec defines the spec to support zone-aware component deployments.
+type ZoneSpec struct {
+	// MaxSkew describes the maximum degree to which Pods can be unevenly distributed.
+	//
+	// +required
+	// +kubebuilder:default:=1
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:number",displayName="Max Skew"
+	MaxSkew int `json:"maxSkew"`
+
+	// TopologyKey is the key that defines a topology in the Nodes' labels.
+	//
+	// +required
+	// +kubebuilder:validation:Required
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Topology Key"
+	TopologyKey string `json:"topologyKey"`
 }
 
 // CredentialMode represents the type of authentication used for accessing the object storage.

@@ -39,9 +39,21 @@ common:
       {{- end }}
     {{- end }}
   compactor_grpc_address: {{ .Compactor.FQDN }}:{{ .Compactor.Port }}
+  {{- with .GossipRing }}
   ring:
     kvstore:
       store: memberlist
+    heartbeat_period: 5s
+    heartbeat_timeout: 1m
+    {{- with .InstanceAddr }}
+    instance_addr: {{ . }}
+    {{- end }}
+    instance_port: {{ .InstancePort }}
+    {{- if .EnableInstanceAvailabilityZone }}
+    zone_awareness_enabled: true
+    instance_availability_zone: ${INSTANCE_AVAILABILITY_ZONE}
+    {{- end }}
+  {{- end }}
 compactor:
   compaction_interval: 2h
   working_directory: {{ .StorageDirectory }}/compactor
@@ -66,6 +78,8 @@ ingester:
     final_sleep: 0s
     join_after: 30s
     num_tokens: 512
+    ring:
+      replication_factor: 1
   wal:
     enabled: false
 ingester_client:
@@ -112,6 +126,20 @@ limits_config:
   per_stream_rate_limit_burst: {{ .Stack.Limits.Global.IngestionLimits.PerStreamRateLimitBurst }}MB
   split_queries_by_interval: 30m
   allow_structured_metadata: {{ .ObjectStorage.AllowStructuredMetadata }}
+{{- with .GossipRing }}
+memberlist:
+  abort_if_cluster_join_fails: true
+  {{- with .InstanceAddr }}
+  advertise_addr: {{ . }}
+  {{- end }}
+  advertise_port: {{ .BindPort }}
+  bind_port: {{ .BindPort }}
+  join_members:
+    - {{ .MembersDiscoveryAddr }}:{{ .BindPort }}
+  max_join_backoff: 1m
+  max_join_retries: 10
+  min_join_backoff: 1s
+{{- end }}
 querier:
   engine:
     max_look_back_period: 30s

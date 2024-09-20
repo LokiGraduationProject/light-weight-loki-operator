@@ -11,6 +11,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -19,6 +20,18 @@ import (
 // BuildQueryFrontend returns a list of k8s objects for Loki QueryFrontend
 func BuildQueryFrontend(opts Options, log logr.Logger) ([]client.Object, error) {
 	deployment := NewQueryFrontendDeployment(opts, log)
+
+	if err := configureHashRingEnv(&deployment.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureProxyEnv(&deployment.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureReplication(&deployment.Spec.Template, opts.Stack.Replication, LabelQueryFrontendComponent, opts.Name); err != nil {
+		return nil, err
+	}
 
 	return []client.Object{
 		deployment,
@@ -127,12 +140,12 @@ func NewQueryFrontendDeployment(opts Options, log logr.Logger) *appsv1.Deploymen
 		Spec: appsv1.DeploymentSpec{
 			Replicas: ptr.To(opts.Stack.Template.QueryFrontend.Replicas),
 			Selector: &metav1.LabelSelector{
-				MatchLabels: l,
+				MatchLabels: labels.Merge(l, GossipLabels()),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        fmt.Sprintf("%s-%s", lokiFrontendContainerName, opts.Name),
-					Labels:      l,
+					Labels:      labels.Merge(l, GossipLabels()),
 					Annotations: a,
 				},
 				Spec: podSpec,

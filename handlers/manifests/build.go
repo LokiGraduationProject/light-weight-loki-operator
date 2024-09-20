@@ -70,6 +70,7 @@ func BuildAll(opts Options, log logr.Logger) ([]client.Object, error) {
 	res = append(res, compactorObjs...)
 	res = append(res, queryFrontendObjs...)
 	res = append(res, indexGatewayObjs...)
+	res = append(res, BuildLokiGossipRingService(opts.Name))
 
 	return res, nil
 }

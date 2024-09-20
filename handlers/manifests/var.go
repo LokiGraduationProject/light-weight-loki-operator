@@ -23,6 +23,11 @@ const (
 	lokiReadinessPath        = "/ready"
 	configVolumeName         = "config"
 
+	gossipPort                       = 7946
+	gossipInstanceAddrEnvVarName     = "HASH_RING_INSTANCE_ADDR"
+	gossipInstanceAddrEnvVarTemplate = "${" + gossipInstanceAddrEnvVarName + "}"
+	lokiGossipPortName               = "gossip-ring"
+
 	// AnnotationLokiConfigHash stores the last SHA1 hash of the loki configuration
 	AnnotationLokiConfigHash string = "loki.grafana.com/config-hash"
 	// AnnotationLokiObjectStoreHash stores the last SHA1 hash of the loki object storage credetials.
@@ -76,6 +81,13 @@ const (
 	tokenAuthConfigVolumeName = "token-auth-config"
 	tokenAuthConfigDirectory  = "/etc/storage/token-auth"
 )
+
+// GossipLabels is the list of labels that should be assigned to components using the gossip ring
+func GossipLabels() map[string]string {
+	return map[string]string{
+		"loki.grafana.com/gossip": "true",
+	}
+}
 
 const (
 	// lokiDefaultQueryTimeout contains the default query timeout. It should match the value mentioned in the CRD

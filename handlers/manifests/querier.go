@@ -5,6 +5,8 @@ import (
 	"math"
 	"path"
 
+	"k8s.io/apimachinery/pkg/labels"
+
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/storage"
 	appsv1 "k8s.io/api/apps/v1"
@@ -21,6 +23,18 @@ func BuildQuerier(opts Options) ([]client.Object, error) {
 	deployment := NewQuerierDeployment(opts)
 
 	if err := storage.ConfigureDeployment(deployment, opts.ObjectStorage); err != nil {
+		return nil, err
+	}
+
+	if err := configureHashRingEnv(&deployment.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureProxyEnv(&deployment.Spec.Template.Spec, opts); err != nil {
+		return nil, err
+	}
+
+	if err := configureReplication(&deployment.Spec.Template, opts.Stack.Replication, LabelQuerierComponent, opts.Name); err != nil {
 		return nil, err
 	}
 
@@ -78,6 +92,11 @@ func NewQuerierDeployment(opts Options) *appsv1.Deployment {
 						ContainerPort: grpcPort,
 						Protocol:      protocolTCP,
 					},
+					{
+						Name:          lokiGossipPortName,
+						ContainerPort: gossipPort,
+						Protocol:      protocolTCP,
+					},
 				},
 				VolumeMounts: []corev1.VolumeMount{
 					{
@@ -110,12 +129,12 @@ func NewQuerierDeployment(opts Options) *appsv1.Deployment {
 		Spec: appsv1.DeploymentSpec{
 			Replicas: ptr.To(opts.Stack.Template.Querier.Replicas),
 			Selector: &metav1.LabelSelector{
-				MatchLabels: l,
+				MatchLabels: labels.Merge(l, GossipLabels()),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        fmt.Sprintf("loki-querier-%s", opts.Name),
-					Labels:      l,
+					Labels:      labels.Merge(l, GossipLabels()),
 					Annotations: a,
 				},
 				Spec: podSpec,
