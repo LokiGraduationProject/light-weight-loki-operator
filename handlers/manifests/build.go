@@ -44,16 +44,19 @@ func BuildAll(opts Options, log logr.Logger) ([]client.Object, error) {
 		return nil, err
 	}
 
+	ll.Info("H")
 	compactorObjs, err := BuildCompactor(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	queryFrontendObjs, err := BuildQueryFrontend(opts)
+	ll.Info("I")
+	queryFrontendObjs, err := BuildQueryFrontend(opts, log)
 	if err != nil {
 		return nil, err
 	}
 
+	ll.Info("J")
 	indexGatewayObjs, err := BuildIndexGateway(opts)
 	if err != nil {
 		return nil, err
@@ -95,18 +98,18 @@ func ApplyDefaultSettings(opts *Options) error {
 				Replicas: 1,
 			},
 			Distributor: &lokiv1.LokiComponentSpec{
-				// Compactor is a singelton application.
-				// Only one replica allowed!!!
 				Replicas: 1,
 			},
 			Ingester: &lokiv1.LokiComponentSpec{
-				// Compactor is a singelton application.
-				// Only one replica allowed!!!
 				Replicas: 1,
 			},
 			Querier: &lokiv1.LokiComponentSpec{
-				// Compactor is a singelton application.
-				// Only one replica allowed!!!
+				Replicas: 1,
+			},
+			QueryFrontend: &lokiv1.LokiComponentSpec{
+				Replicas: 1,
+			},
+			IndexGateway: &lokiv1.LokiComponentSpec{
 				Replicas: 1,
 			},
 		},

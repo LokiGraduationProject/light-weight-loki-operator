@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/go-logr/logr"
+
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -15,8 +17,8 @@ import (
 )
 
 // BuildQueryFrontend returns a list of k8s objects for Loki QueryFrontend
-func BuildQueryFrontend(opts Options) ([]client.Object, error) {
-	deployment := NewQueryFrontendDeployment(opts)
+func BuildQueryFrontend(opts Options, log logr.Logger) ([]client.Object, error) {
+	deployment := NewQueryFrontendDeployment(opts, log)
 
 	return []client.Object{
 		deployment,
@@ -27,9 +29,12 @@ func BuildQueryFrontend(opts Options) ([]client.Object, error) {
 }
 
 // NewQueryFrontendDeployment creates a deployment object for a query-frontend
-func NewQueryFrontendDeployment(opts Options) *appsv1.Deployment {
+func NewQueryFrontendDeployment(opts Options, log logr.Logger) *appsv1.Deployment {
+	ll := log.WithValues("lokistack", "default", "event", "QueryFrontend")
+	ll.Info("start")
 	l := ComponentLabels(LabelQueryFrontendComponent, opts.Name)
 	a := commonAnnotations(opts)
+	ll.Info("start2")
 	podSpec := corev1.PodSpec{
 		ServiceAccountName: opts.Name,
 		Volumes: []corev1.Volume{
@@ -56,7 +61,7 @@ func NewQueryFrontendDeployment(opts Options) *appsv1.Deployment {
 				Args: []string{
 					"-target=query-frontend",
 					fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
-					fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
+					// fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
 					"-config.expand-env=true",
 				},
 				ReadinessProbe: &corev1.Probe{
@@ -103,6 +108,7 @@ func NewQueryFrontendDeployment(opts Options) *appsv1.Deployment {
 			},
 		},
 	}
+	ll.Info("start3")
 
 	if opts.Stack.Template != nil && opts.Stack.Template.QueryFrontend != nil {
 		podSpec.Tolerations = opts.Stack.Template.QueryFrontend.Tolerations

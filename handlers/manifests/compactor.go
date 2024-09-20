@@ -60,7 +60,7 @@ func NewCompactorStatefulSet(opts Options) *appsv1.StatefulSet {
 				Args: []string{
 					"-target=compactor",
 					fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
-					fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
+					// fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
 					"-config.expand-env=true",
 				},
 				ReadinessProbe: lokiReadinessProbe(),

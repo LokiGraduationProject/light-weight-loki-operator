@@ -62,7 +62,7 @@ func NewDistributorDeployment(opts Options, log logr.Logger) *appsv1.Deployment 
 				Args: []string{
 					"-target=distributor",
 					fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
-					fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
+					// fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
 					"-config.expand-env=true",
 				},
 				ReadinessProbe: lokiReadinessProbe(),

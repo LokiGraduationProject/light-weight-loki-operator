@@ -39,6 +39,9 @@ common:
       {{- end }}
     {{- end }}
   compactor_grpc_address: {{ .Compactor.FQDN }}:{{ .Compactor.Port }}
+  ring:
+    kvstore:
+      store: memberlist
 compactor:
   compaction_interval: 2h
   working_directory: {{ .StorageDirectory }}/compactor
@@ -63,6 +66,8 @@ ingester:
     final_sleep: 0s
     join_after: 30s
     num_tokens: 512
+  wal:
+    enabled: false
 ingester_client:
   grpc_client_config:
     max_recv_msg_size: 67108864

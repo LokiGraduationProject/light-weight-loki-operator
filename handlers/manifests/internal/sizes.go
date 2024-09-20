@@ -11,8 +11,6 @@ type ComponentResources struct {
 	IndexGateway ResourceRequirements
 	Ingester     ResourceRequirements
 	Compactor    ResourceRequirements
-	Ruler        ResourceRequirements
-	WALStorage   ResourceRequirements
 	// these two don't need a PVCSize
 	Querier       corev1.ResourceRequirements
 	Distributor   corev1.ResourceRequirements
@@ -257,9 +255,6 @@ var StackSizeTable = map[lokiv1.LokiStackSizeType]lokiv1.LokiStackSpec{
 // ResourceRequirementsTable defines the default resource requests and limits for each size
 var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 	lokiv1.SizeOneXDemo: {
-		Ruler: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-		},
 		Ingester: ResourceRequirements{
 			PVCSize: resource.MustParse("10Gi"),
 		},
@@ -269,9 +264,6 @@ var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 		IndexGateway: ResourceRequirements{
 			PVCSize: resource.MustParse("10Gi"),
 		},
-		WALStorage: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-		},
 	},
 	lokiv1.SizeOneXExtraSmall: {
 		Querier: corev1.ResourceRequirements{
@@ -279,13 +271,6 @@ var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 				corev1.ResourceCPU:    resource.MustParse("1.5"),
 				corev1.ResourceMemory: resource.MustParse("3Gi"),
 			},
-		},
-		Ruler: ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("2Gi"),
-			},
-			PVCSize: resource.MustParse("10Gi"),
 		},
 		Ingester: ResourceRequirements{
 			PVCSize: resource.MustParse("10Gi"),
@@ -327,9 +312,6 @@ var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 				corev1.ResourceMemory: resource.MustParse("1Gi"),
 			},
 		},
-		WALStorage: ResourceRequirements{
-			PVCSize: resource.MustParse("150Gi"),
-		},
 	},
 	lokiv1.SizeOneXSmall: {
 		Querier: corev1.ResourceRequirements{
@@ -337,13 +319,6 @@ var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 				corev1.ResourceCPU:    resource.MustParse("4"),
 				corev1.ResourceMemory: resource.MustParse("4Gi"),
 			},
-		},
-		Ruler: ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("4"),
-				corev1.ResourceMemory: resource.MustParse("8Gi"),
-			},
-			PVCSize: resource.MustParse("10Gi"),
 		},
 		Ingester: ResourceRequirements{
 			PVCSize: resource.MustParse("10Gi"),
@@ -385,9 +360,6 @@ var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 				corev1.ResourceMemory: resource.MustParse("2Gi"),
 			},
 		},
-		WALStorage: ResourceRequirements{
-			PVCSize: resource.MustParse("150Gi"),
-		},
 	},
 	lokiv1.SizeOneXMedium: {
 		Querier: corev1.ResourceRequirements{
@@ -395,13 +367,6 @@ var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 				corev1.ResourceCPU:    resource.MustParse("6"),
 				corev1.ResourceMemory: resource.MustParse("10Gi"),
 			},
-		},
-		Ruler: ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("8"),
-				corev1.ResourceMemory: resource.MustParse("16Gi"),
-			},
-			PVCSize: resource.MustParse("10Gi"),
 		},
 		Ingester: ResourceRequirements{
 			PVCSize: resource.MustParse("10Gi"),
@@ -442,9 +407,6 @@ var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 				corev1.ResourceCPU:    resource.MustParse("1"),
 				corev1.ResourceMemory: resource.MustParse("2Gi"),
 			},
-		},
-		WALStorage: ResourceRequirements{
-			PVCSize: resource.MustParse("150Gi"),
 		},
 	},
 }

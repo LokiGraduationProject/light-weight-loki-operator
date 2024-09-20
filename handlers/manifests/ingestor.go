@@ -62,7 +62,7 @@ func NewIngesterStatefulSet(opts Options) *appsv1.StatefulSet {
 				Args: []string{
 					"-target=ingester",
 					fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
-					fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
+					// fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
 					"-config.expand-env=true",
 				},
 				ReadinessProbe: lokiReadinessProbe(),
@@ -141,21 +141,6 @@ func NewIngesterStatefulSet(opts Options) *appsv1.StatefulSet {
 						Resources: corev1.ResourceRequirements{
 							Requests: map[corev1.ResourceName]resource.Quantity{
 								corev1.ResourceStorage: opts.ResourceRequirements.Ingester.PVCSize,
-							},
-						},
-						StorageClassName: ptr.To(opts.Stack.StorageClassName),
-						VolumeMode:       &volumeFileSystemMode,
-					},
-				},
-				{
-					Spec: corev1.PersistentVolumeClaimSpec{
-						AccessModes: []corev1.PersistentVolumeAccessMode{
-							// TODO: should we verify that this is possible with the given storage class first?
-							corev1.ReadWriteOnce,
-						},
-						Resources: corev1.ResourceRequirements{
-							Requests: map[corev1.ResourceName]resource.Quantity{
-								corev1.ResourceStorage: opts.ResourceRequirements.WALStorage.PVCSize,
 							},
 						},
 						StorageClassName: ptr.To(opts.Stack.StorageClassName),

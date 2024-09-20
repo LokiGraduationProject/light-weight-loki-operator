@@ -62,7 +62,7 @@ func NewQuerierDeployment(opts Options) *appsv1.Deployment {
 				Args: []string{
 					"-target=querier",
 					fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
-					fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
+					// fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
 					"-config.expand-env=true",
 				},
 				ReadinessProbe: lokiReadinessProbe(),
