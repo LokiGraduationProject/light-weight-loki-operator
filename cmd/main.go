@@ -135,6 +135,15 @@ func main() {
 	}
 	//+kubebuilder:scaffold:builder
 
+	if err = (&controller.CanaryReconciler{
+		Client: mgr.GetClient(),
+		Log:    logger.WithName("controllers").WithName("Canary"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		logger.Error(err, "unable to create controller", "controller", "Canary")
+		os.Exit(1)
+	}
+
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)

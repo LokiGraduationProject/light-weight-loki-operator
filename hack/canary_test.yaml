@@ -1,0 +1,23 @@
+apiVersion: loki.lightweight.com/v1
+kind: Canary
+metadata:
+  name: example-canary
+  labels:
+    app: loki-canary
+spec:
+  strategy: 'DaemonSet'
+  name: 'canary-deployment'
+  addr: 'lokistack-dev-querier-http.default.svc.cluster.local:3100'
+  daemonSetLabels:
+    - key: 'ds'
+      value: 'loki-canary'
+  podLabels:
+    - key: 'app'
+      value: 'canary'
+  podAnnotations:
+    - key: 'description'
+      value: 'Loki Canary Pod'
+  tenantId: 'default'
+  labelName: 'app'
+  labelValue: 'canary'
+  port: 3500
