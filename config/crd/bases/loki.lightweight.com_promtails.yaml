@@ -1,0 +1,257 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: promtails.loki.lightweight.com
+spec:
+  group: loki.lightweight.com
+  names:
+    kind: Promtail
+    listKind: PromtailList
+    plural: promtails
+    singular: promtail
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: Promtail is the Schema for the promtails API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PromtailSpec defines the desired state of Promtail
+            properties:
+              promtail_config:
+                description: PromtailConfig defines the configuration of the promtail
+                  deployment
+                properties:
+                  clients:
+                    items:
+                      properties:
+                        backoff_config:
+                          description: 백오프 설정
+                          properties:
+                            max_period:
+                              type: string
+                            max_retries:
+                              type: integer
+                            min_period:
+                              type: string
+                          type: object
+                        basic_auth:
+                          description: Basic Auth 설정
+                          properties:
+                            password:
+                              type: string
+                            password_file:
+                              type: string
+                            username:
+                              type: string
+                          type: object
+                        batchsize:
+                          description: 최대 배치 크기
+                          type: integer
+                        batchwait:
+                          description: 최대 대기 시간
+                          type: string
+                        bearer_token:
+                          description: Bearer Token 설정
+                          type: string
+                        bearer_token_file:
+                          type: string
+                        drop_rate_limited_batches:
+                          description: Rate Limit 관련 설정
+                          type: boolean
+                        external_labels:
+                          additionalProperties:
+                            type: string
+                          description: 외부 레이블 설정
+                          type: object
+                        headers:
+                          additionalProperties:
+                            type: string
+                          description: HTTP 헤더 설정
+                          type: object
+                        oauth2:
+                          description: OAuth2 설정
+                          properties:
+                            client_id:
+                              type: string
+                            client_secret:
+                              type: string
+                            client_secret_file:
+                              type: string
+                            endpoint_params:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            scopes:
+                              items:
+                                type: string
+                              type: array
+                            token_url:
+                              type: string
+                          type: object
+                        proxy_url:
+                          description: 프록시 설정
+                          type: string
+                        tenant_id:
+                          description: 테넌트 ID
+                          type: string
+                        timeout:
+                          description: 요청 타임아웃
+                          type: string
+                        tls_config:
+                          description: TLS 설정
+                          properties:
+                            ca_file:
+                              type: string
+                            cert_file:
+                              type: string
+                            insecure_skip_verify:
+                              type: boolean
+                            key_file:
+                              type: string
+                            server_name:
+                              type: string
+                          type: object
+                        url:
+                          description: Loki의 HTTP URL
+                          type: string
+                      type: object
+                    type: array
+                  positions:
+                    properties:
+                      filename:
+                        type: string
+                      ignore_invalid_yaml:
+                        type: boolean
+                      sync_period:
+                        type: string
+                    type: object
+                  scrape_configs:
+                    items:
+                      properties:
+                        job_name:
+                          type: string
+                        kubernetes_sd_configs:
+                          items:
+                            properties:
+                              role:
+                                type: string
+                            type: object
+                          type: array
+                        pipeline_stages:
+                          items:
+                            properties:
+                              cri:
+                                type: object
+                              docker:
+                                type: object
+                            type: object
+                          type: array
+                        relabel_configs:
+                          items:
+                            properties:
+                              action:
+                                description: Action to perform based on regex matching.
+                                type: string
+                              modulus:
+                                description: Modulus to take of the hash of the source
+                                  label values.
+                                format: int64
+                                type: integer
+                              regex:
+                                description: Regex is the regular expression against
+                                  which the extracted value is matched.
+                                type: string
+                              replacement:
+                                description: Replacement is the value against which
+                                  a regex replace is performed if the regular expression
+                                  matches.
+                                type: string
+                              separator:
+                                description: Separator placed between concatenated
+                                  source label values.
+                                type: string
+                              source_labels:
+                                description: Their content is concatenated using the
+                                  configured separator.
+                                items:
+                                  type: string
+                                type: array
+                              target_label:
+                                description: TargetLabel is the label to which the
+                                  resulting value is written in a replace action.
+                                type: string
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  server:
+                    properties:
+                      disable:
+                        type: boolean
+                      enable_runtime_reload:
+                        type: boolean
+                      graceful_shutdown_timeout:
+                        type: string
+                      grpc_listen_address:
+                        type: string
+                      grpc_listen_port:
+                        type: integer
+                      grpc_server_max_concurrent_streams:
+                        type: integer
+                      grpc_server_max_recv_msg_size:
+                        type: integer
+                      grpc_server_max_send_msg_size:
+                        type: integer
+                      health_check_target:
+                        type: boolean
+                      http_listen_address:
+                        type: string
+                      http_listen_port:
+                        type: integer
+                      http_path_prefix:
+                        type: string
+                      http_server_idle_timeout:
+                        type: string
+                      http_server_read_timeout:
+                        type: string
+                      http_server_write_timeout:
+                        type: string
+                      log_level:
+                        type: string
+                      profiling_enabled:
+                        type: boolean
+                      register_instrumentation:
+                        type: boolean
+                    type: object
+                  target_config:
+                    properties:
+                      sync_period:
+                        type: string
+                    type: object
+                type: object
+            type: object
+          status:
+            description: PromtailStatus defines the observed state of Promtail
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
