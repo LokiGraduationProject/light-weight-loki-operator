@@ -1,0 +1,27 @@
+# permissions for end users to view promtails.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: promtail-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: light-weight-loki-operator
+    app.kubernetes.io/part-of: light-weight-loki-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: promtail-viewer-role
+rules:
+- apiGroups:
+  - loki.lightweight.com
+  resources:
+  - promtails
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - loki.lightweight.com
+  resources:
+  - promtails/status
+  verbs:
+  - get

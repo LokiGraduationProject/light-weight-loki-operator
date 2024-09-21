@@ -1,0 +1,12 @@
+apiVersion: loki.lightweight.com/v1
+kind: Promtail
+metadata:
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/instance: promtail-sample
+    app.kubernetes.io/part-of: light-weight-loki-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: light-weight-loki-operator
+  name: promtail-sample
+spec:
+  # TODO(user): Add fields here

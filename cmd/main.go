@@ -133,6 +133,13 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "LokiStack")
 		os.Exit(1)
 	}
+	if err = (&controller.PromtailReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Promtail")
+		os.Exit(1)
+	}
 	//+kubebuilder:scaffold:builder
 
 	if err = (&controller.CanaryReconciler{
