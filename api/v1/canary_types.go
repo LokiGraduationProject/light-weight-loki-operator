@@ -34,15 +34,7 @@ type CanarySpec struct {
 
 	// Number of buckets in the response_latency histogram (default 10)
 	Buckets int32 `json:"buckets,omitempty"`
-
-	// // TLS-related fields
-	// CAFile   string `json:"caFile,omitempty"`
-	// CertFile string `json:"certFile,omitempty"`
-	// KeyFile  string `json:"keyFile,omitempty"`
-	// Insecure bool   `json:"insecure,omitempty"`
-	// TLS      bool   `json:"tls,omitempty"`
-	// User     string `json:"user,omitempty"`
-	// Pass     string `json:"pass,omitempty"`
+	// Number of concurrent queries to run (default 1)
 	TenantID string `json:"tenantId,omitempty"`
 
 	// Logging parameters
