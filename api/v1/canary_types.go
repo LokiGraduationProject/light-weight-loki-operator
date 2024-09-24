@@ -11,9 +11,6 @@ type Label struct {
 
 // CanarySpec defines the desired state of Canary
 type CanarySpec struct {
-	// Strategy defines whether to use a Deployment or DaemonSet
-	Strategy string `json:"strategy,omitempty"`
-
 	// Name is the name of the Canary deployment
 	Name string `json:"name,omitempty"`
 

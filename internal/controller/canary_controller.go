@@ -152,27 +152,6 @@ func buildArgs(spec lokiv1.CanarySpec) []string {
 	if spec.Buckets != 0 {
 		args = append(args, fmt.Sprintf("-buckets=%d", spec.Buckets))
 	}
-	// if spec.CAFile != "" {
-	// 	args = append(args, fmt.Sprintf("-ca-file=%s", spec.CAFile))
-	// }
-	// if spec.CertFile != "" {
-	// 	args = append(args, fmt.Sprintf("-cert-file=%s", spec.CertFile))
-	// }
-	// if spec.KeyFile != "" {
-	// 	args = append(args, fmt.Sprintf("-key-file=%s", spec.KeyFile))
-	// }
-	// if spec.Insecure {
-	// 	args = append(args, "-insecure")
-	// }
-	// if spec.TLS {
-	// 	args = append(args, "-tls")
-	// }
-	// if spec.User != "" {
-	// 	args = append(args, fmt.Sprintf("-user=%s", spec.User))
-	// }
-	// if spec.Pass != "" {
-	// 	args = append(args, fmt.Sprintf("-pass=%s", spec.Pass))
-	// }
 	if spec.Interval != "" {
 		args = append(args, fmt.Sprintf("-interval=%s", spec.Interval))
 	}
