@@ -15,12 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	// configv1 "github.com/grafana/loki/operator/apis/config/v1"
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
-	// "github.com/grafana/loki/operator/internal/external/k8s"
-	// "github.com/grafana/loki/operator/internal/handlers/internal/gateway"
-	// "github.com/grafana/loki/operator/internal/handlers/internal/serviceaccounts"
-	// "github.com/grafana/loki/operator/internal/handlers/internal/tlsprofile"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/external/k8s"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/serviceaccounts"
