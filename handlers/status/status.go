@@ -14,9 +14,6 @@ import (
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/external/k8s"
 )
 
-// Refresh executes an aggregate update of the LokiStack Status struct, i.e.
-// - It recreates the Status.Components pod status map per component.
-// - It sets the appropriate Status.Condition to true that matches the pod status maps.
 func Refresh(ctx context.Context, k k8s.Client, req ctrl.Request, now time.Time, degradedErr *DegradedError) error {
 	var stack lokiv1.LokiStack
 	if err := k.Get(ctx, req.NamespacedName, &stack); err != nil {
@@ -53,10 +50,8 @@ func Refresh(ctx context.Context, k k8s.Client, req ctrl.Request, now time.Time,
 	case err == nil:
 		return nil
 	case apierrors.IsConflict(err):
-		// break into retry-logic below on conflict
 		break
 	case err != nil:
-		// return non-conflict errors
 		return err
 	}
 

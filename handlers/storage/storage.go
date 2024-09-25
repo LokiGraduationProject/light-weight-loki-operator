@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	// configv1 "github.com/grafana/loki/operator/apis/config/v1"
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/external/k8s"
 
@@ -13,15 +12,6 @@ import (
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/status"
 )
 
-// BuildOptions returns the object storage options to generate Kubernetes resource manifests
-// which require access to object storage buckets.
-// The returned error can be a status.DegradedError in the following cases:
-//   - The user-provided object storage secret is missing.
-//   - The object storage Secret data is invalid.
-//   - The object storage schema config is invalid.
-//   - The object storage CA ConfigMap is missing if one referenced.
-//   - The object storage CA ConfigMap data is invalid.
-//   - The object storage token cco auth secret is missing (Only on OpenShift STS-clusters)
 func BuildOptions(ctx context.Context, k k8s.Client, stack *lokiv1.LokiStack) (storage.Options, error) {
 	storageSecret, err := getSecrets(ctx, k, stack)
 	if err != nil {

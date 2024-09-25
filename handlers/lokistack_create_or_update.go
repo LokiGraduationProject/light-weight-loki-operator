@@ -22,7 +22,6 @@ import (
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/storage"
 )
 
-// CreateOrUpdateLokiStack handles LokiStack create and update events.
 func CreateOrUpdateLokiStack(
 	ctx context.Context,
 	log logr.Logger,
@@ -32,6 +31,8 @@ func CreateOrUpdateLokiStack(
 ) error {
 	ll := log.WithValues("lokistack", req.NamespacedName, "event", "createOrUpdate")
 
+	ll.Info("1: Create or Update Lokistack begin")
+
 	var stack lokiv1.LokiStack
 	if err := k.Get(ctx, req.NamespacedName, &stack); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -40,6 +41,8 @@ func CreateOrUpdateLokiStack(
 		}
 		return kverrors.Wrap(err, "failed to lookup lokistack", "name", req.NamespacedName)
 	}
+
+	ll.Info("2: Config Object Storage")
 
 	objStore, err := storage.BuildOptions(ctx, k, &stack)
 	if err != nil {
@@ -54,7 +57,7 @@ func CreateOrUpdateLokiStack(
 		ObjectStorage: objStore,
 	}
 
-	ll.Info("begin building manifests")
+	ll.Info("3: Config Default settings")
 
 	if optErr := manifests.ApplyDefaultSettings(&opts); optErr != nil {
 		ll.Error(optErr, "failed to conform options to build settings")
@@ -67,11 +70,6 @@ func CreateOrUpdateLokiStack(
 		return err
 	}
 
-	// The status is updated before the objects are actually created to
-	// avoid the scenario in which the configmap is successfully created or
-	// updated and another resource is not. This would cause the status to
-	// be possibly misaligned with the configmap, which could lead to
-	// a user possibly being unable to read logs.
 	if err := status.SetStorageSchemaStatus(ctx, k, req, objStore.Schemas); err != nil {
 		ll.Error(err, "failed to set storage schema status")
 		return err
@@ -123,6 +121,8 @@ func CreateOrUpdateLokiStack(
 	if errCount > 0 {
 		return kverrors.New("failed to configure lokistack resources", "name", req.NamespacedName)
 	}
+
+	ll.Info("Create or Update Lokistack end")
 
 	return nil
 }

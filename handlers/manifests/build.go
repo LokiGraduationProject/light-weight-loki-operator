@@ -75,15 +75,11 @@ func BuildAll(opts Options, log logr.Logger) ([]client.Object, error) {
 	return res, nil
 }
 
-// DefaultLokiStackSpec returns the default configuration for a LokiStack of
-// the specified size
 func DefaultLokiStackSpec(size lokiv1.LokiStackSizeType) *lokiv1.LokiStackSpec {
 	defaults := internal.StackSizeTable[size]
 	return (&defaults).DeepCopy()
 }
 
-// ApplyDefaultSettings manipulates the options to conform to
-// build specifications
 func ApplyDefaultSettings(opts *Options) error {
 	spec := DefaultLokiStackSpec(opts.Stack.Size)
 

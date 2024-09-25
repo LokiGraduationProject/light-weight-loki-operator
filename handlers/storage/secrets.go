@@ -40,8 +40,6 @@ func getSecrets(ctx context.Context, k k8s.Client, stack *lokiv1.LokiStack) (*co
 	return &storageSecret, nil
 }
 
-// extractSecrets reads the k8s obj storage secret into a manifest object storage struct if valid.
-// The token cco auth is also read into the manifest object under the right circumstances.
 func extractSecrets(secretSpec lokiv1.ObjectStorageSecretSpec, objStore *corev1.Secret) (storage.Options, error) {
 	hash, err := hashSecretData(objStore)
 	if err != nil {
@@ -97,14 +95,12 @@ func hashSecretData(s *corev1.Secret) (string, error) {
 }
 
 func extractS3ConfigSecret(s *corev1.Secret) (*storage.S3StorageConfig, error) {
-	// Extract and validate mandatory fields
 	buckets := s.Data["bucketnames"]
 	if len(buckets) == 0 {
 		return nil, fmt.Errorf("%w: %s", errors.New("missing secret field"), "bucketnames")
 	}
 
 	var (
-		// Fields related with static authentication
 		endpoint = s.Data["endpoint"]
 		id       = s.Data["access_key_id"]
 		secret   = s.Data["access_key_secret"]
@@ -140,7 +136,6 @@ func validateS3Endpoint(endpoint string) error {
 	}
 
 	if parsedURL.Scheme == "" {
-		// Assume "just a hostname" when scheme is empty and produce a clearer error message
 		return errors.New("endpoint for S3 must be an HTTP or HTTPS URL")
 	}
 

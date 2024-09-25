@@ -26,7 +26,6 @@ type ResourceRequirements struct {
 	PDBMinAvailable int
 }
 
-// StackSizeTable defines the default configurations for each size
 var StackSizeTable = map[lokiv1.LokiStackSizeType]lokiv1.LokiStackSpec{
 	lokiv1.SizeOneXDemo: {
 		Size: lokiv1.SizeOneXDemo,
