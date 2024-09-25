@@ -36,13 +36,13 @@ func CreateOrUpdateLokiStack(
 	var stack lokiv1.LokiStack
 	if err := k.Get(ctx, req.NamespacedName, &stack); err != nil {
 		if apierrors.IsNotFound(err) {
-			// maybe the user deleted it before we could react? Either way this isn't an issue
 			ll.Error(err, "could not find the requested loki stack", "name", req.NamespacedName)
 			return "", nil
 		}
 		return "", kverrors.Wrap(err, "failed to lookup lokistack", "name", req.NamespacedName)
 	}
 
+	// TODO: IS THIS REQUIRED?
 	img := os.Getenv(manifests.EnvRelatedImageLoki)
 	if img == "" {
 		img = manifests.DefaultContainerImage

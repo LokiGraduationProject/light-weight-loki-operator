@@ -59,7 +59,6 @@ func (r *LokiStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	credentialMode, err := r.updateResources(ctx, req)
 	switch {
 	case errors.As(err, &degraded):
-		// degraded errors are handled by status.Refresh below
 	case err != nil:
 		return ctrl.Result{}, err
 	}
