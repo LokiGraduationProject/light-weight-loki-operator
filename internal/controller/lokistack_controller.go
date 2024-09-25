@@ -56,14 +56,14 @@ type LokiStackReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *LokiStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var degraded *status.DegradedError
-	credentialMode, err := r.updateResources(ctx, req)
+	err := r.updateResources(ctx, req)
 	switch {
 	case errors.As(err, &degraded):
 	case err != nil:
 		return ctrl.Result{}, err
 	}
 
-	err = status.Refresh(ctx, r.Client, req, time.Now(), credentialMode, degraded)
+	err = status.Refresh(ctx, r.Client, req, time.Now(), degraded)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -77,14 +77,14 @@ func (r *LokiStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return ctrl.Result{}, nil
 }
 
-func (r *LokiStackReconciler) updateResources(ctx context.Context, req ctrl.Request) (lokiv1.CredentialMode, error) {
+func (r *LokiStackReconciler) updateResources(ctx context.Context, req ctrl.Request) error {
 
-	credentialMode, err := handlers.CreateOrUpdateLokiStack(ctx, r.Log, req, r.Client, r.Scheme)
+	err := handlers.CreateOrUpdateLokiStack(ctx, r.Log, req, r.Client, r.Scheme)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return credentialMode, nil
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/ViaQ/logerr/v2/kverrors"
 	"github.com/go-logr/logr"
@@ -30,34 +29,27 @@ func CreateOrUpdateLokiStack(
 	req ctrl.Request,
 	k k8s.Client,
 	s *runtime.Scheme,
-) (lokiv1.CredentialMode, error) {
+) error {
 	ll := log.WithValues("lokistack", req.NamespacedName, "event", "createOrUpdate")
 
 	var stack lokiv1.LokiStack
 	if err := k.Get(ctx, req.NamespacedName, &stack); err != nil {
 		if apierrors.IsNotFound(err) {
 			ll.Error(err, "could not find the requested loki stack", "name", req.NamespacedName)
-			return "", nil
+			return nil
 		}
-		return "", kverrors.Wrap(err, "failed to lookup lokistack", "name", req.NamespacedName)
-	}
-
-	// TODO: IS THIS REQUIRED?
-	img := os.Getenv(manifests.EnvRelatedImageLoki)
-	if img == "" {
-		img = manifests.DefaultContainerImage
+		return kverrors.Wrap(err, "failed to lookup lokistack", "name", req.NamespacedName)
 	}
 
 	objStore, err := storage.BuildOptions(ctx, k, &stack)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	// Here we will translate the lokiv1.LokiStack options into manifest options
 	opts := manifests.Options{
 		Name:          req.Name,
 		Namespace:     req.Namespace,
-		Image:         img,
+		Image:         manifests.DefaultContainerImage,
 		Stack:         stack.Spec,
 		ObjectStorage: objStore,
 	}
@@ -66,13 +58,13 @@ func CreateOrUpdateLokiStack(
 
 	if optErr := manifests.ApplyDefaultSettings(&opts); optErr != nil {
 		ll.Error(optErr, "failed to conform options to build settings")
-		return "", optErr
+		return optErr
 	}
 
 	objects, err := manifests.BuildAll(opts, log)
 	if err != nil {
 		ll.Error(err, "failed to build manifests")
-		return "", err
+		return err
 	}
 
 	// The status is updated before the objects are actually created to
@@ -82,7 +74,7 @@ func CreateOrUpdateLokiStack(
 	// a user possibly being unable to read logs.
 	if err := status.SetStorageSchemaStatus(ctx, k, req, objStore.Schemas); err != nil {
 		ll.Error(err, "failed to set storage schema status")
-		return "", err
+		return err
 	}
 
 	var errCount int32
@@ -106,7 +98,7 @@ func CreateOrUpdateLokiStack(
 		depAnnotations, err := dependentAnnotations(ctx, k, obj)
 		if err != nil {
 			l.Error(err, "failed to set dependent annotations")
-			return "", err
+			return err
 		}
 
 		desired := obj.DeepCopyObject().(client.Object)
@@ -129,10 +121,10 @@ func CreateOrUpdateLokiStack(
 	}
 
 	if errCount > 0 {
-		return "", kverrors.New("failed to configure lokistack resources", "name", req.NamespacedName)
+		return kverrors.New("failed to configure lokistack resources", "name", req.NamespacedName)
 	}
 
-	return objStore.CredentialMode, nil
+	return nil
 }
 
 // isNamespacedResource determines if an object should be managed or not by a LokiStack
