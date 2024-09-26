@@ -120,25 +120,6 @@ func (r *PromtailReconciler) createOrUpdateConfigMap(ctx context.Context, promta
 	}
 }
 
-// func generatePromtailConfigYAML(config lokiv1.PromtailConfig) (string, error) {
-// 	// PromtailConfig 구조체를 맵으로 변환
-// 	configMap := map[string]interface{}{
-// 			"server":         config.Server,
-// 			"clients":        config.Clients,
-// 			"positions":      config.Positions,
-// 			"target_config":  config.TargetConfig,
-// 			"scrape_configs": config.ScrapeConfigs,
-// 	}
-
-// 	// YAML로 직렬화
-// 	yamlData, err := yaml.Marshal(configMap)
-// 	if err != nil {
-// 			return "", err
-// 	}
-
-// 	return string(yamlData), nil
-// }
-
 func generatePromtailConfigYAML(config lokiv1.PromtailConfig) (string, error) {
 	yamlData, err := yaml.Marshal(&config)
 	if err != nil {
