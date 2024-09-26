@@ -122,18 +122,12 @@ spec:
                 type: string
               spotCheckQueryRate:
                 type: string
-              strategy:
-                description: Strategy defines whether to use a Deployment or DaemonSet
-                type: string
               streamName:
                 type: string
               streamValue:
                 type: string
               tenantId:
-                description: // TLS-related fields CAFile   string `json:"caFile,omitempty"`
-                  CertFile string `json:"certFile,omitempty"` KeyFile  string `json:"keyFile,omitempty"`
-                  Insecure bool   `json:"insecure,omitempty"` TLS      bool   `json:"tls,omitempty"`
-                  User     string `json:"user,omitempty"` Pass     string `json:"pass,omitempty"`
+                description: Number of concurrent queries to run (default 1)
                 type: string
               waitDuration:
                 type: string

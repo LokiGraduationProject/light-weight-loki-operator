@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"fmt"
-	"time"
 
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/external/k8s"
@@ -27,19 +26,7 @@ func BuildOptions(ctx context.Context, k k8s.Client, stack *lokiv1.LokiStack) (s
 		}
 	}
 
-	now := time.Now().UTC()
-	storageSchemas, err := storage.BuildSchemaConfig(
-		now,
-		stack.Spec.Storage,
-		stack.Status.Storage,
-	)
-	if err != nil {
-		return storage.Options{}, &status.DegradedError{
-			Message: fmt.Sprintf("Invalid object storage schema contents: %s", err),
-			Reason:  lokiv1.ReasonInvalidObjectStorageSchema,
-			Requeue: false,
-		}
-	}
+	storageSchemas := storage.BuildSchemas(stack.Spec.Storage.Schemas)
 
 	objStore.Schemas = storageSchemas
 
