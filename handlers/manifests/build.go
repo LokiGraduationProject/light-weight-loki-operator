@@ -87,35 +87,6 @@ func ApplyDefaultSettings(opts *Options) error {
 		return kverrors.Wrap(err, "failed merging stack user options", "name", opts.Name)
 	}
 
-	strictOverrides := lokiv1.LokiStackSpec{
-		Template: &lokiv1.LokiTemplateSpec{
-			Compactor: &lokiv1.LokiComponentSpec{
-				// Compactor is a singelton application.
-				// Only one replica allowed!!!
-				Replicas: 1,
-			},
-			Distributor: &lokiv1.LokiComponentSpec{
-				Replicas: 1,
-			},
-			Ingester: &lokiv1.LokiComponentSpec{
-				Replicas: 1,
-			},
-			Querier: &lokiv1.LokiComponentSpec{
-				Replicas: 1,
-			},
-			QueryFrontend: &lokiv1.LokiComponentSpec{
-				Replicas: 1,
-			},
-			IndexGateway: &lokiv1.LokiComponentSpec{
-				Replicas: 1,
-			},
-		},
-	}
-
-	if err := mergo.Merge(spec, strictOverrides, mergo.WithOverride); err != nil {
-		return kverrors.Wrap(err, "failed to merge strict defaults")
-	}
-
 	opts.ResourceRequirements = internal.ResourceRequirementsTable[opts.Stack.Size]
 	opts.Stack = *spec
 

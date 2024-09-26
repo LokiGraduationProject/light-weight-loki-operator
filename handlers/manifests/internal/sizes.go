@@ -6,19 +6,17 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-// ComponentResources is a map of component->requests/limits
 type ComponentResources struct {
 	IndexGateway ResourceRequirements
 	Ingester     ResourceRequirements
 	Compactor    ResourceRequirements
-	// these two don't need a PVCSize
+	
 	Querier       corev1.ResourceRequirements
 	Distributor   corev1.ResourceRequirements
 	QueryFrontend corev1.ResourceRequirements
 	Gateway       corev1.ResourceRequirements
 }
 
-// ResourceRequirements sets CPU, Memory, and PVC requirements for a component
 type ResourceRequirements struct {
 	Limits          corev1.ResourceList
 	Requests        corev1.ResourceList
@@ -251,7 +249,6 @@ var StackSizeTable = map[lokiv1.LokiStackSizeType]lokiv1.LokiStackSpec{
 	},
 }
 
-// ResourceRequirementsTable defines the default resource requests and limits for each size
 var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 	lokiv1.SizeOneXDemo: {
 		Ingester: ResourceRequirements{

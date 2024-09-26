@@ -8,7 +8,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,18 +30,14 @@ func CreateOrUpdateLokiStack(
 ) error {
 	ll := log.WithValues("lokistack", req.NamespacedName, "event", "createOrUpdate")
 
-	ll.Info("1: Create or Update Lokistack begin")
+	ll.Info("0: Create or Update Lokistack begin")
 
 	var stack lokiv1.LokiStack
 	if err := k.Get(ctx, req.NamespacedName, &stack); err != nil {
-		if apierrors.IsNotFound(err) {
-			ll.Error(err, "could not find the requested loki stack", "name", req.NamespacedName)
-			return nil
-		}
 		return kverrors.Wrap(err, "failed to lookup lokistack", "name", req.NamespacedName)
 	}
 
-	ll.Info("2: Config Object Storage")
+	ll.Info("1: Config Object Storage")
 
 	objStore, err := storage.BuildOptions(ctx, k, &stack)
 	if err != nil {
@@ -57,14 +52,14 @@ func CreateOrUpdateLokiStack(
 		ObjectStorage: objStore,
 	}
 
-	ll.Info("3: Config Default settings")
+	ll.Info("2: Config Default settings")
 
 	if optErr := manifests.ApplyDefaultSettings(&opts); optErr != nil {
 		ll.Error(optErr, "failed to conform options to build settings")
 		return optErr
 	}
 
-	ll.Info("4: Build all components")
+	ll.Info("3: Build all components")
 
 	objects, err := manifests.BuildAll(opts, log)
 	if err != nil {
