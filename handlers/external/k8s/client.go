@@ -9,12 +9,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 -generate
-
-// Client is a kubernetes client interface used internally. It copies functions from
-// sigs.k8s.io/controller-runtime/pkg/client
-//
-//counterfeiter:generate . Client
 type Client interface {
 	Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error
 	Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error
@@ -34,20 +28,12 @@ type Client interface {
 	SubResource(subResource string) client.SubResourceClient
 }
 
-// StatusWriter is a kubernetes status writer interface used internally. It copies functions from
-// sigs.k8s.io/controller-runtime/pkg/client
-//
-//counterfeiter:generate . StatusWriter
 type StatusWriter interface {
 	Create(ctx context.Context, obj client.Object, subResource client.Object, opts ...client.SubResourceCreateOption) error
 	Update(ctx context.Context, obj client.Object, opts ...client.SubResourceUpdateOption) error
 	Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.SubResourcePatchOption) error
 }
 
-// SubResourceClient is a kubernetes status writer interface used internally. It copies functions from
-// sigs.k8s.io/controller-runtime/pkg/client
-//
-//counterfeiter:generate . SubResourceClient
 type SubResourceClient interface {
 	Get(ctx context.Context, obj client.Object, subResource client.Object, opts ...client.SubResourceGetOption) error
 

@@ -10,10 +10,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-// Builder is a controller-runtime interface used internally. It copies function from
-// sigs.k8s.io/controller-runtime/pkg/builder
-//
-//counterfeiter:generate . Builder
 type Builder interface {
 	For(object client.Object, opts ...builder.ForOption) Builder
 	Owns(object client.Object, opts ...builder.OwnsOption) Builder
@@ -30,8 +26,6 @@ type ctrlBuilder struct {
 	bld *builder.Builder
 }
 
-// NewCtrlBuilder returns a self-referencing controlled builder
-// passthrough wrapper implementing the Builder interface above.
 func NewCtrlBuilder(b *builder.Builder) Builder {
 	return &ctrlBuilder{bld: b}
 }
