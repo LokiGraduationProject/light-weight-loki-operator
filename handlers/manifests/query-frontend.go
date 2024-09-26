@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/go-logr/logr"
-
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -17,9 +15,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// BuildQueryFrontend returns a list of k8s objects for Loki QueryFrontend
-func BuildQueryFrontend(opts Options, log logr.Logger) ([]client.Object, error) {
-	deployment := NewQueryFrontendDeployment(opts, log)
+func BuildQueryFrontend(opts Options) ([]client.Object, error) {
+	deployment := NewQueryFrontendDeployment(opts)
 
 	if err := configureHashRingEnv(&deployment.Spec.Template.Spec, opts); err != nil {
 		return nil, err
@@ -41,13 +38,10 @@ func BuildQueryFrontend(opts Options, log logr.Logger) ([]client.Object, error) 
 	}, nil
 }
 
-// NewQueryFrontendDeployment creates a deployment object for a query-frontend
-func NewQueryFrontendDeployment(opts Options, log logr.Logger) *appsv1.Deployment {
-	ll := log.WithValues("lokistack", "default", "event", "QueryFrontend")
-	ll.Info("start")
+func NewQueryFrontendDeployment(opts Options) *appsv1.Deployment {
 	l := ComponentLabels(LabelQueryFrontendComponent, opts.Name)
 	a := commonAnnotations(opts)
-	ll.Info("start2")
+
 	podSpec := corev1.PodSpec{
 		ServiceAccountName: opts.Name,
 		Volumes: []corev1.Volume{
@@ -74,16 +68,11 @@ func NewQueryFrontendDeployment(opts Options, log logr.Logger) *appsv1.Deploymen
 				Args: []string{
 					"-target=query-frontend",
 					fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
-					// fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
 					"-config.expand-env=true",
 				},
 				ReadinessProbe: &corev1.Probe{
 					ProbeHandler: corev1.ProbeHandler{
 						HTTPGet: &corev1.HTTPGetAction{
-							// The frontend will only return ready once a querier has connected to it.
-							// Because the service used for connecting the querier to the frontend only lists ready
-							// instances there's sequencing issue. For now, we re-use the liveness-probe path
-							// for the readiness-probe as a workaround.
 							Path:   lokiLivenessPath,
 							Port:   intstr.FromInt(httpPort),
 							Scheme: corev1.URISchemeHTTP,
@@ -121,7 +110,6 @@ func NewQueryFrontendDeployment(opts Options, log logr.Logger) *appsv1.Deploymen
 			},
 		},
 	}
-	ll.Info("start3")
 
 	if opts.Stack.Template != nil && opts.Stack.Template.QueryFrontend != nil {
 		podSpec.Tolerations = opts.Stack.Template.QueryFrontend.Tolerations
@@ -157,7 +145,6 @@ func NewQueryFrontendDeployment(opts Options, log logr.Logger) *appsv1.Deploymen
 	}
 }
 
-// NewQueryFrontendGRPCService creates a k8s service for the query-frontend GRPC endpoint
 func NewQueryFrontendGRPCService(opts Options) *corev1.Service {
 	serviceName := serviceNameQueryFrontendGRPC(opts.Name)
 	labels := ComponentLabels(LabelQueryFrontendComponent, opts.Name)
@@ -186,7 +173,6 @@ func NewQueryFrontendGRPCService(opts Options) *corev1.Service {
 	}
 }
 
-// NewQueryFrontendHTTPService creates a k8s service for the query-frontend HTTP endpoint
 func NewQueryFrontendHTTPService(opts Options) *corev1.Service {
 	serviceName := serviceNameQueryFrontendHTTP(opts.Name)
 	labels := ComponentLabels(LabelQueryFrontendComponent, opts.Name)
@@ -214,8 +200,6 @@ func NewQueryFrontendHTTPService(opts Options) *corev1.Service {
 	}
 }
 
-// NewQueryFrontendPodDisruptionBudget returns a PodDisruptionBudget for the LokiStack
-// query-frontend pods.
 func NewQueryFrontendPodDisruptionBudget(opts Options) *policyv1.PodDisruptionBudget {
 	l := ComponentLabels(LabelQueryFrontendComponent, opts.Name)
 	ma := intstr.FromInt(1)

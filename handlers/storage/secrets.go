@@ -2,10 +2,8 @@ package storage
 
 import (
 	"context"
-	"crypto/sha1"
 	"errors"
 	"fmt"
-	"sort"
 
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/external/k8s"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -30,53 +28,20 @@ func getSecrets(ctx context.Context, k k8s.Client, stack *lokiv1.LokiStack) (*co
 }
 
 func extractSecrets(secretSpec lokiv1.ObjectStorageSecretSpec, objStore *corev1.Secret) (storage.Options, error) {
-	hash, err := hashSecretData(objStore)
-	if err != nil {
-		return storage.Options{}, errors.New("error calculating hash for secret")
-	}
-
 	storageOpts := storage.Options{
 		SecretName:  objStore.Name,
-		SecretSHA1:  hash,
 		SharedStore: secretSpec.Type,
 	}
 
-	storageOpts.S3, err = extractS3ConfigSecret(objStore)
+	temp, err := extractS3ConfigSecret(objStore)
+
+	storageOpts.S3 = temp
 
 	if err != nil {
 		return storage.Options{}, err
 	}
 
 	return storageOpts, nil
-}
-
-func hashSecretData(s *corev1.Secret) (string, error) {
-	keys := make([]string, 0, len(s.Data))
-	for k := range s.Data {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	h := sha1.New()
-	for _, k := range keys {
-		if _, err := h.Write([]byte(k)); err != nil {
-			return "", err
-		}
-
-		if _, err := h.Write([]byte(",")); err != nil {
-			return "", err
-		}
-
-		if _, err := h.Write(s.Data[k]); err != nil {
-			return "", err
-		}
-
-		if _, err := h.Write([]byte(",")); err != nil {
-			return "", err
-		}
-	}
-
-	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
 func extractS3ConfigSecret(s *corev1.Secret) (*storage.S3StorageConfig, error) {

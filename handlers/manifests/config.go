@@ -4,7 +4,6 @@ import (
 	"crypto/sha1"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -13,19 +12,14 @@ import (
 )
 
 // LokiConfigMap creates the single configmap containing the loki configuration for the whole cluster
-func LokiConfigMap(opt Options, log logr.Logger) (*corev1.ConfigMap, string, error) {
-	ll := log.WithValues("lokistack", "default", "event", "BuildAll")
-	ll.Info("1")
+func LokiConfigMap(opt Options) (*corev1.ConfigMap, string, error) {
 	cfg := ConfigOptions(opt)
 
-	ll.Info("2")
 	c, err := config.Build(cfg)
 	if err != nil {
-		ll.Error(err, "hi")
 		return nil, "", err
 	}
 
-	ll.Info("3")
 	s := sha1.New()
 	_, err = s.Write(c)
 	if err != nil {
@@ -49,13 +43,10 @@ func LokiConfigMap(opt Options, log logr.Logger) (*corev1.ConfigMap, string, err
 	}, sha1C, nil
 }
 
-// ConfigOptions converts Options to config.Options
 func ConfigOptions(opt Options) config.Options {
 
 	protocol := "http"
 
-	// Build a slice of with the shippers that are being used in the config
-	// booleans used to prevent duplicates
 	shippers := []string{}
 	boltdb := false
 	tsdb := false
@@ -123,9 +114,6 @@ func gossipRingConfig(stackName, stackNs string, spec *lokiv1.HashRingSpec, repl
 			// Do nothing use loki defaults
 		}
 
-		// Always default to use the pod IP address when IPv6 enabled to ensure:
-		// - On Single Stack IPv6: Skip interface checking
-		// - On Dual Stack IPv4/6: Eliminate duplicate memberlist node registration
 		if spec.MemberList.EnableIPv6 {
 			enableIPv6 = true
 			instanceAddr = gossipInstanceAddrEnvVarTemplate

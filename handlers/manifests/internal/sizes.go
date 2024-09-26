@@ -10,7 +10,7 @@ type ComponentResources struct {
 	IndexGateway ResourceRequirements
 	Ingester     ResourceRequirements
 	Compactor    ResourceRequirements
-	
+
 	Querier       corev1.ResourceRequirements
 	Distributor   corev1.ResourceRequirements
 	QueryFrontend corev1.ResourceRequirements

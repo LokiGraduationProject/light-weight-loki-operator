@@ -4,59 +4,46 @@ import (
 	lokiv1 "github.com/LokiGraduationProject/light-weight-loki-operator/api/v1"
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal"
 	"github.com/ViaQ/logerr/kverrors"
-	"github.com/go-logr/logr"
 	"github.com/imdario/mergo"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// BuildAll builds all manifests required to run a Loki Stack
-func BuildAll(opts Options, log logr.Logger) ([]client.Object, error) {
-	ll := log.WithValues("lokistack", "default", "event", "BuildAll")
-
-	ll.Info("B")
+func BuildAll(opts Options) ([]client.Object, error) {
 	res := make([]client.Object, 0)
 
-	ll.Info("C")
 	sa := BuildServiceAccount(opts)
 
-	ll.Info("D")
-	cm, sha1C, mapErr := LokiConfigMap(opts, log)
+	cm, sha1C, mapErr := LokiConfigMap(opts)
 	if mapErr != nil {
 		return nil, mapErr
 	}
 	opts.ConfigSHA1 = sha1C
 
-	ll.Info("E")
-	distributorObjs, err := BuildDistributor(opts, log)
+	distributorObjs, err := BuildDistributor(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	ll.Info("F")
 	ingesterObjs, err := BuildIngester(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	ll.Info("G")
 	querierObjs, err := BuildQuerier(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	ll.Info("H")
 	compactorObjs, err := BuildCompactor(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	ll.Info("I")
-	queryFrontendObjs, err := BuildQueryFrontend(opts, log)
+	queryFrontendObjs, err := BuildQueryFrontend(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	ll.Info("J")
 	indexGatewayObjs, err := BuildIndexGateway(opts)
 	if err != nil {
 		return nil, err

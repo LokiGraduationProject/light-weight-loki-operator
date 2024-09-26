@@ -15,7 +15,6 @@ type Options struct {
 	S3 *S3StorageConfig
 
 	SecretName string
-	SecretSHA1 string
 }
 
 // S3StorageConfig for S3 storage config

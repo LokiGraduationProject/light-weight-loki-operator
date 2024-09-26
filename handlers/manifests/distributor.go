@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
@@ -17,9 +16,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// BuildDistributor returns a list of k8s objects for Loki Distributor
-func BuildDistributor(opts Options, log logr.Logger) ([]client.Object, error) {
-	deployment := NewDistributorDeployment(opts, log)
+func BuildDistributor(opts Options) ([]client.Object, error) {
+	deployment := NewDistributorDeployment(opts)
 
 	if err := configureHashRingEnv(&deployment.Spec.Template.Spec, opts); err != nil {
 		return nil, err
@@ -41,15 +39,10 @@ func BuildDistributor(opts Options, log logr.Logger) ([]client.Object, error) {
 	}, nil
 }
 
-// NewDistributorDeployment creates a deployment object for a distributor
-func NewDistributorDeployment(opts Options, log logr.Logger) *appsv1.Deployment {
-	ll := log.WithValues("lokistack", "default", "event", "distributor")
-
+func NewDistributorDeployment(opts Options) *appsv1.Deployment {
 	l := ComponentLabels(LabelDistributorComponent, opts.Name)
 	a := commonAnnotations(opts)
-	ll.Info(LabelDistributorComponent)
-	ll.Info(opts.Name)
-	// ll.Info(opts.Stack.DefaultNodeAffinity)
+
 	podSpec := corev1.PodSpec{
 		ServiceAccountName: opts.Name,
 		Volumes: []corev1.Volume{
@@ -76,7 +69,6 @@ func NewDistributorDeployment(opts Options, log logr.Logger) *appsv1.Deployment 
 				Args: []string{
 					"-target=distributor",
 					fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
-					// fmt.Sprintf("-runtime-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiRuntimeConfigFileName)),
 					"-config.expand-env=true",
 				},
 				ReadinessProbe: lokiReadinessProbe(),

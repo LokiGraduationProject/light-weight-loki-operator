@@ -7,8 +7,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// BuildServiceAccount returns a k8s object for the LokiStack
-// serviceaccount.
 func BuildServiceAccount(opts Options) client.Object {
 	return &corev1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
