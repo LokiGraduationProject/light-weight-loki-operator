@@ -5,9 +5,59 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  - serviceaccounts
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  - persistentvolumes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
   - apps
   resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  - serviceaccounts
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
   - deployments
+  - statefulsets
   verbs:
   - create
   - delete
@@ -60,6 +110,14 @@ rules:
 - apiGroups:
   - loki.lightweight.com
   resources:
+  - canaries
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - loki.lightweight.com
+  resources:
   - lokistacks
   verbs:
   - create
@@ -83,3 +141,36 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - loki.lightweight.com
+  resources:
+  - promtails
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - rolebindings
+  - roles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

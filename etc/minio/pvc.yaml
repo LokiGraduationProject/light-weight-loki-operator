@@ -6,7 +6,8 @@ metadata:
   name: minio
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
+  storageClassName: gp2
