@@ -230,6 +230,15 @@ func mutatePodSpec(existing *corev1.PodSpec, desired *corev1.PodSpec) {
 }
 
 func mutateSecurityContext(existing, desired *corev1.PodSecurityContext) {
-	existing.RunAsUser = desired.RunAsUser
-	existing.FSGroup = desired.FSGroup
+	if existing == nil {
+		existing = &corev1.PodSecurityContext{}
+	}
+
+	// 원하는 SecurityContext의 값을 기존 SecurityContext에 복사
+	if desired.RunAsUser != nil {
+		existing.RunAsUser = desired.RunAsUser
+	}
+	if desired.FSGroup != nil {
+		existing.FSGroup = desired.FSGroup
+	}
 }
