@@ -226,5 +226,10 @@ func mutatePodSpec(existing *corev1.PodSpec, desired *corev1.PodSpec) {
 	existing.Tolerations = desired.Tolerations
 	existing.TopologySpreadConstraints = desired.TopologySpreadConstraints
 	existing.Volumes = desired.Volumes
-	existing.SecurityContext = desired.SecurityContext
+	mutateSecurityContext(existing.SecurityContext, desired.SecurityContext)
+}
+
+func mutateSecurityContext(existing, desired *corev1.PodSecurityContext) {
+	existing.RunAsUser = desired.RunAsUser
+	existing.FSGroup = desired.FSGroup
 }
