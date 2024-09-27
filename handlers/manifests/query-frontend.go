@@ -109,6 +109,10 @@ func NewQueryFrontendDeployment(opts Options) *appsv1.Deployment {
 				ImagePullPolicy:          "IfNotPresent",
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: ptr.To(int64(1000)),
+			FSGroup:   ptr.To(int64(1000)),
+		},
 	}
 
 	if opts.Stack.Template != nil && opts.Stack.Template.QueryFrontend != nil {

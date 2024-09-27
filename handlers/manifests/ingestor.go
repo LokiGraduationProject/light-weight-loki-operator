@@ -115,6 +115,10 @@ func NewIngesterStatefulSet(opts Options) *appsv1.StatefulSet {
 				ImagePullPolicy:          "IfNotPresent",
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: ptr.To(int64(1000)),
+			FSGroup:   ptr.To(int64(2000)),
+		},
 	}
 
 	if opts.Stack.Template != nil && opts.Stack.Template.Ingester != nil {
