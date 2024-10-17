@@ -81,7 +81,7 @@ func ConfigOptions(opt Options) config.Options {
 			FQDN: fqdn(NewBackendGRPCService(opt).GetName(), opt.Namespace),
 			Port: grpcPort,
 		},
-		GossipRing: gossipRingConfig(opt.Name, opt.Namespace, opt.Stack.HashRing, opt.Stack.Replication),
+		GossipRing:       gossipRingConfig(opt.Name, opt.Namespace, opt.Stack.HashRing, opt.Stack.Replication),
 		StorageDirectory: dataDirectory,
 		MaxConcurrent: config.MaxConcurrent{
 			AvailableQuerierCPUCores: int32(opt.ResourceRequirements.Querier.Requests.Cpu().Value()),

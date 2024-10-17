@@ -6,7 +6,7 @@ metadata:
     app: loki-canary
 spec:
   name: 'canary-deployment'
-  addr: 'lokistack-dev-querier-http.default.svc.cluster.local:3100'
+  addr: 'lokistack-dev-read-http.default.svc.cluster.local:3100'
   daemonSetLabels:
     - key: 'ds'
       value: 'loki-canary'

@@ -272,22 +272,6 @@ func IndexGatewayName(stackName string) string {
 	return fmt.Sprintf("%s-index-gateway", stackName)
 }
 
-func serviceNameQuerierHTTP(stackName string) string {
-	return fmt.Sprintf("%s-querier-http", stackName)
-}
-
-func serviceNameQuerierGRPC(stackName string) string {
-	return fmt.Sprintf("%s-querier-grpc", stackName)
-}
-
-func serviceNameIngesterGRPC(stackName string) string {
-	return fmt.Sprintf("%s-ingester-grpc", stackName)
-}
-
-func serviceNameIngesterHTTP(stackName string) string {
-	return fmt.Sprintf("%s-ingester-http", stackName)
-}
-
 func serviceNameWriteGRPC(stackName string) string {
 	return fmt.Sprintf("%s-write-grpc", stackName)
 }
@@ -310,38 +294,6 @@ func serviceNameBackendGRPC(stackName string) string {
 
 func serviceNameBackendHTTP(stackName string) string {
 	return fmt.Sprintf("%s-backend-http", stackName)
-}
-
-func serviceNameDistributorGRPC(stackName string) string {
-	return fmt.Sprintf("%s-distributor-grpc", stackName)
-}
-
-func serviceNameDistributorHTTP(stackName string) string {
-	return fmt.Sprintf("%s-distributor-http", stackName)
-}
-
-func serviceNameCompactorGRPC(stackName string) string {
-	return fmt.Sprintf("%s-compactor-grpc", stackName)
-}
-
-func serviceNameCompactorHTTP(stackName string) string {
-	return fmt.Sprintf("%s-compactor-http", stackName)
-}
-
-func serviceNameQueryFrontendGRPC(stackName string) string {
-	return fmt.Sprintf("%s-query-frontend-grpc", stackName)
-}
-
-func serviceNameQueryFrontendHTTP(stackName string) string {
-	return fmt.Sprintf("%s-query-frontend-http", stackName)
-}
-
-func serviceNameIndexGatewayHTTP(stackName string) string {
-	return fmt.Sprintf("%s-index-gateway-http", stackName)
-}
-
-func serviceNameIndexGatewayGRPC(stackName string) string {
-	return fmt.Sprintf("%s-index-gateway-grpc", stackName)
 }
 
 func fqdn(serviceName, namespace string) string {

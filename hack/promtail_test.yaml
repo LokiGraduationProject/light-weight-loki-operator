@@ -10,7 +10,7 @@ spec:
       grpc_listen_port: 0
 
     clients:
-      - url: http://lokistack-dev-distributor-http.default.svc:3100/loki/api/v1/push
+      - url: http://lokistack-dev-write-http.default.svc:3100/loki/api/v1/push
         tenant_id: default
 
     positions:
