@@ -13,11 +13,11 @@ type Options struct {
 
 	Namespace             string
 	Name                  string
-	Compactor             Address
-	FrontendWorker        Address
+	Read_http             Address
+	Read_grpc             Address
+	Write                 Address
+	Backend               Address
 	GossipRing            GossipRing
-	Querier               Address
-	IndexGateway          Address
 	StorageDirectory      string
 	MaxConcurrent         MaxConcurrent
 	EnableRemoteReporting bool

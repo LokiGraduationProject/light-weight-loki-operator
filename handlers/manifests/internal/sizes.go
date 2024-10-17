@@ -15,6 +15,9 @@ type ComponentResources struct {
 	Distributor   corev1.ResourceRequirements
 	QueryFrontend corev1.ResourceRequirements
 	Gateway       corev1.ResourceRequirements
+
+	Write ResourceRequirements
+	Read  corev1.ResourceRequirements
 }
 
 type ResourceRequirements struct {
@@ -251,158 +254,152 @@ var StackSizeTable = map[lokiv1.LokiStackSizeType]lokiv1.LokiStackSpec{
 
 var ResourceRequirementsTable = map[lokiv1.LokiStackSizeType]ComponentResources{
 	lokiv1.SizeOneXDemo: {
-		Ingester: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-		},
-		Compactor: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-		},
-		IndexGateway: ResourceRequirements{
+		Write: ResourceRequirements{
 			PVCSize: resource.MustParse("10Gi"),
 		},
 	},
-	lokiv1.SizeOneXExtraSmall: {
-		Querier: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1.5"),
-				corev1.ResourceMemory: resource.MustParse("3Gi"),
-			},
-		},
-		Ingester: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("8Gi"),
-			},
-			PDBMinAvailable: 1,
-		},
-		Distributor: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("1Gi"),
-			},
-		},
-		QueryFrontend: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("1Gi"),
-			},
-		},
-		Compactor: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("2Gi"),
-			},
-		},
-		Gateway: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("500m"),
-				corev1.ResourceMemory: resource.MustParse("500Mi"),
-			},
-		},
-		IndexGateway: ResourceRequirements{
-			PVCSize: resource.MustParse("50Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("500m"),
-				corev1.ResourceMemory: resource.MustParse("1Gi"),
-			},
-		},
-	},
-	lokiv1.SizeOneXSmall: {
-		Querier: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("4"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
-			},
-		},
-		Ingester: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("4"),
-				corev1.ResourceMemory: resource.MustParse("20Gi"),
-			},
-			PDBMinAvailable: 1,
-		},
-		Distributor: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("2Gi"),
-			},
-		},
-		QueryFrontend: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("4"),
-				corev1.ResourceMemory: resource.MustParse("2.5Gi"),
-			},
-		},
-		Compactor: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
-			},
-		},
-		Gateway: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("1Gi"),
-			},
-		},
-		IndexGateway: ResourceRequirements{
-			PVCSize: resource.MustParse("50Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("2Gi"),
-			},
-		},
-	},
-	lokiv1.SizeOneXMedium: {
-		Querier: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("6"),
-				corev1.ResourceMemory: resource.MustParse("10Gi"),
-			},
-		},
-		Ingester: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("6"),
-				corev1.ResourceMemory: resource.MustParse("30Gi"),
-			},
-			PDBMinAvailable: 2,
-		},
-		Distributor: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("2Gi"),
-			},
-		},
-		QueryFrontend: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("4"),
-				corev1.ResourceMemory: resource.MustParse("2.5Gi"),
-			},
-		},
-		Compactor: ResourceRequirements{
-			PVCSize: resource.MustParse("10Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
-			},
-		},
-		Gateway: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("1Gi"),
-			},
-		},
-		IndexGateway: ResourceRequirements{
-			PVCSize: resource.MustParse("50Gi"),
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("2Gi"),
-			},
-		},
-	},
+	// lokiv1.SizeOneXExtraSmall: {
+	// 	Querier: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("1.5"),
+	// 			corev1.ResourceMemory: resource.MustParse("3Gi"),
+	// 		},
+	// 	},
+	// 	Ingester: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("10Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("2"),
+	// 			corev1.ResourceMemory: resource.MustParse("8Gi"),
+	// 		},
+	// 		PDBMinAvailable: 1,
+	// 	},
+	// 	Distributor: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("1"),
+	// 			corev1.ResourceMemory: resource.MustParse("1Gi"),
+	// 		},
+	// 	},
+	// 	QueryFrontend: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("1"),
+	// 			corev1.ResourceMemory: resource.MustParse("1Gi"),
+	// 		},
+	// 	},
+	// 	Compactor: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("10Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("1"),
+	// 			corev1.ResourceMemory: resource.MustParse("2Gi"),
+	// 		},
+	// 	},
+	// 	Gateway: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("500m"),
+	// 			corev1.ResourceMemory: resource.MustParse("500Mi"),
+	// 		},
+	// 	},
+	// 	IndexGateway: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("50Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("500m"),
+	// 			corev1.ResourceMemory: resource.MustParse("1Gi"),
+	// 		},
+	// 	},
+	// },
+	// lokiv1.SizeOneXSmall: {
+	// 	Querier: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("4"),
+	// 			corev1.ResourceMemory: resource.MustParse("4Gi"),
+	// 		},
+	// 	},
+	// 	Ingester: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("10Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("4"),
+	// 			corev1.ResourceMemory: resource.MustParse("20Gi"),
+	// 		},
+	// 		PDBMinAvailable: 1,
+	// 	},
+	// 	Distributor: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("2"),
+	// 			corev1.ResourceMemory: resource.MustParse("2Gi"),
+	// 		},
+	// 	},
+	// 	QueryFrontend: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("4"),
+	// 			corev1.ResourceMemory: resource.MustParse("2.5Gi"),
+	// 		},
+	// 	},
+	// 	Compactor: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("10Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("2"),
+	// 			corev1.ResourceMemory: resource.MustParse("4Gi"),
+	// 		},
+	// 	},
+	// 	Gateway: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("1"),
+	// 			corev1.ResourceMemory: resource.MustParse("1Gi"),
+	// 		},
+	// 	},
+	// 	IndexGateway: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("50Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("1"),
+	// 			corev1.ResourceMemory: resource.MustParse("2Gi"),
+	// 		},
+	// 	},
+	// },
+	// lokiv1.SizeOneXMedium: {
+	// 	Querier: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("6"),
+	// 			corev1.ResourceMemory: resource.MustParse("10Gi"),
+	// 		},
+	// 	},
+	// 	Ingester: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("10Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("6"),
+	// 			corev1.ResourceMemory: resource.MustParse("30Gi"),
+	// 		},
+	// 		PDBMinAvailable: 2,
+	// 	},
+	// 	Distributor: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("2"),
+	// 			corev1.ResourceMemory: resource.MustParse("2Gi"),
+	// 		},
+	// 	},
+	// 	QueryFrontend: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("4"),
+	// 			corev1.ResourceMemory: resource.MustParse("2.5Gi"),
+	// 		},
+	// 	},
+	// 	Compactor: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("10Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("2"),
+	// 			corev1.ResourceMemory: resource.MustParse("4Gi"),
+	// 		},
+	// 	},
+	// 	Gateway: corev1.ResourceRequirements{
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("1"),
+	// 			corev1.ResourceMemory: resource.MustParse("1Gi"),
+	// 		},
+	// 	},
+	// 	IndexGateway: ResourceRequirements{
+	// 		PVCSize: resource.MustParse("50Gi"),
+	// 		Requests: map[corev1.ResourceName]resource.Quantity{
+	// 			corev1.ResourceCPU:    resource.MustParse("1"),
+	// 			corev1.ResourceMemory: resource.MustParse("2Gi"),
+	// 		},
+	// 	},
+	// },
 }

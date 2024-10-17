@@ -19,44 +19,26 @@ func BuildAll(opts Options) ([]client.Object, error) {
 	}
 	opts.ConfigSHA1 = sha1C
 
-	distributorObjs, err := BuildDistributor(opts)
+	backendObjs, err := BuildBackendComponent(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	ingesterObjs, err := BuildIngester(opts)
+	writeObjs, err := BuildWriteComponent(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	querierObjs, err := BuildQuerier(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	compactorObjs, err := BuildCompactor(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	queryFrontendObjs, err := BuildQueryFrontend(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	indexGatewayObjs, err := BuildIndexGateway(opts)
+	readObjs, err := BuildReadComponent(opts)
 	if err != nil {
 		return nil, err
 	}
 
 	res = append(res, cm)
 	res = append(res, sa)
-	res = append(res, distributorObjs...)
-	res = append(res, ingesterObjs...)
-	res = append(res, querierObjs...)
-	res = append(res, compactorObjs...)
-	res = append(res, queryFrontendObjs...)
-	res = append(res, indexGatewayObjs...)
+	res = append(res, backendObjs...)
+	res = append(res, writeObjs...)
+	res = append(res, readObjs...)
 	res = append(res, BuildLokiGossipRingService(opts.Name))
 
 	return res, nil

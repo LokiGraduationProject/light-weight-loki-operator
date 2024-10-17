@@ -2,6 +2,7 @@ package manifests
 
 import (
 	"fmt"
+	"math"
 	"path"
 
 	"github.com/LokiGraduationProject/light-weight-loki-operator/handlers/manifests/internal/config"
@@ -17,8 +18,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func BuildWriteComponent(opts Options) ([]client.Object, error) {
-	statefulSet := newWriteStatefulSet(opts)
+func BuildBackendComponent(opts Options) ([]client.Object, error) {
+	statefulSet := newBackendStatefulSet(opts)
 
 	if err := storage.ConfigureStatefulSet(statefulSet, opts.ObjectStorage); err != nil {
 		return nil, err
@@ -32,20 +33,20 @@ func BuildWriteComponent(opts Options) ([]client.Object, error) {
 		return nil, err
 	}
 
-	if err := configureReplication(&statefulSet.Spec.Template, opts.Stack.Replication, LabelWriteComponent, opts.Name); err != nil {
+	if err := configureReplication(&statefulSet.Spec.Template, opts.Stack.Replication, LabelBackendComponent, opts.Name); err != nil {
 		return nil, err
 	}
 
 	return []client.Object{
 		statefulSet,
-		NewWriteGRPCService(opts),
-		NewWriteHTTPService(opts),
-		newWritePodDisruptionBudget(opts),
+		NewBackendGRPCService(opts),
+		NewBackendHTTPService(opts),
+		NewBackendPodDisruptionBudget(opts),
 	}, nil
 }
 
-func newWriteStatefulSet(opts Options) *appsv1.StatefulSet {
-	l := ComponentLabels(LabelWriteComponent, opts.Name)
+func newBackendStatefulSet(opts Options) *appsv1.StatefulSet {
+	l := ComponentLabels(LabelBackendComponent, opts.Name)
 	a := commonAnnotations(opts)
 
 	replicas := int32(1)
@@ -56,7 +57,7 @@ func newWriteStatefulSet(opts Options) *appsv1.StatefulSet {
 			APIVersion: appsv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "loki-write",
+			Name:   "loki-backend",
 			Labels: l,
 		},
 		Spec: appsv1.StatefulSetSpec{
@@ -68,7 +69,7 @@ func newWriteStatefulSet(opts Options) *appsv1.StatefulSet {
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:        fmt.Sprintf("loki-write-%s", opts.Name),
+					Name:        fmt.Sprintf("loki-backend-%s", opts.Name),
 					Labels:      labels.Merge(l, GossipLabels()),
 					Annotations: a,
 				},
@@ -90,7 +91,7 @@ func newWriteStatefulSet(opts Options) *appsv1.StatefulSet {
 					Containers: []corev1.Container{
 						{
 							Image: opts.Image,
-							Name:  "loki-write-component",
+							Name:  "loki-backend-component",
 							Resources: corev1.ResourceRequirements{
 								Requests: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("500m"),
@@ -98,7 +99,7 @@ func newWriteStatefulSet(opts Options) *appsv1.StatefulSet {
 								},
 							},
 							Args: []string{
-								"-target=write",
+								"-target=backend",
 								fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
 								"-config.expand-env=true",
 							},
@@ -164,8 +165,8 @@ func newWriteStatefulSet(opts Options) *appsv1.StatefulSet {
 	}
 }
 
-func NewWriteGRPCService(opts Options) *corev1.Service {
-	labels := ComponentLabels(LabelWriteComponent, opts.Name)
+func NewBackendGRPCService(opts Options) *corev1.Service {
+	labels := ComponentLabels(LabelBackendComponent, opts.Name)
 
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -173,7 +174,7 @@ func NewWriteGRPCService(opts Options) *corev1.Service {
 			APIVersion: corev1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   serviceNameWriteGRPC(opts.Name),
+			Name:   serviceNameBackendGRPC(opts.Name),
 			Labels: labels,
 		},
 		Spec: corev1.ServiceSpec{
@@ -191,9 +192,9 @@ func NewWriteGRPCService(opts Options) *corev1.Service {
 	}
 }
 
-func NewWriteHTTPService(opts Options) *corev1.Service {
-	serviceName := serviceNameWriteHTTP(opts.Name)
-	labels := ComponentLabels(LabelWriteComponent, opts.Name)
+func NewBackendHTTPService(opts Options) *corev1.Service {
+	serviceName := serviceNameBackendHTTP(opts.Name)
+	labels := ComponentLabels(LabelBackendComponent, opts.Name)
 
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -218,13 +219,13 @@ func NewWriteHTTPService(opts Options) *corev1.Service {
 	}
 }
 
-func newWritePodDisruptionBudget(opts Options) *policyv1.PodDisruptionBudget {
-	l := ComponentLabels(LabelIngesterComponent, opts.Name)
-	// Default to 1 if not defined in ResourceRequirementsTable for a given size
-	mu := intstr.FromInt(1)
-	if opts.ResourceRequirements.Write.PDBMinAvailable > 0 {
-		mu = intstr.FromInt(opts.ResourceRequirements.Write.PDBMinAvailable)
-	}
+func NewBackendPodDisruptionBudget(opts Options) *policyv1.PodDisruptionBudget {
+	l := ComponentLabels(LabelBackendComponent, opts.Name)
+
+	// Have at least N-1 replicas available, unless N==1 in which case the minimum available is 1.
+	replicas := int32(1)
+	ma := intstr.FromInt(int(math.Max(1, float64(replicas-1))))
+
 	return &policyv1.PodDisruptionBudget{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "PodDisruptionBudget",
@@ -232,14 +233,14 @@ func newWritePodDisruptionBudget(opts Options) *policyv1.PodDisruptionBudget {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:    l,
-			Name:      IngesterName(opts.Name),
+			Name:      ReadName(opts.Name),
 			Namespace: opts.Namespace,
 		},
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: l,
 			},
-			MinAvailable: &mu,
+			MinAvailable: &ma,
 		},
 	}
 }

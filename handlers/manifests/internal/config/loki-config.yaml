@@ -38,7 +38,7 @@ common:
       {{- end }}
       {{- end }}
     {{- end }}
-  compactor_grpc_address: {{ .Compactor.FQDN }}:{{ .Compactor.Port }}
+  compactor_grpc_address: {{ .Backend.FQDN }}:{{ .Backend.Port }}
   {{- with .GossipRing }}
   ring:
     kvstore:
@@ -58,12 +58,12 @@ compactor:
   compaction_interval: 2h
   working_directory: {{ .StorageDirectory }}/compactor
 frontend:
-  tail_proxy_url: {{ .Querier.Protocol }}://{{ .Querier.FQDN }}:{{ .Querier.Port }}
+  tail_proxy_url: {{ .Read_http.Protocol }}://{{ .Read_http.FQDN }}:{{ .Read_http.Port }}
   compress_responses: true
   max_outstanding_per_tenant: 4096
   log_queries_longer_than: 5s
 frontend_worker:
-  frontend_address: {{ .FrontendWorker.FQDN }}:{{ .FrontendWorker.Port }}
+  frontend_address: {{ .Read_grpc.FQDN }}:{{ .Read_grpc.Port }}
   grpc_client_config:
     max_send_msg_size: 104857600
 ingester:
@@ -200,7 +200,7 @@ storage_config:
     cache_ttl: 24h
     resync_interval: 5m
     index_gateway_client:
-      server_address: dns:///{{ $.IndexGateway.FQDN }}:{{ $.IndexGateway.Port }}
+      server_address: dns:///{{ $.Backend.FQDN }}:{{ $.Backend.Port }}
 {{- end }}
 tracing:
   enabled: false

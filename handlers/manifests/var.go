@@ -50,6 +50,10 @@ const (
 	// LabelGatewayComponent is the label value for the lokiStack-gateway component
 	LabelGatewayComponent string = "lokistack-gateway"
 
+	LabelWriteComponent   string = "write"
+	LabelReadComponent    string = "read"
+	LabelBackendComponent string = "backend"
+
 	// EnvRelatedImageLoki is the environment variable to fetch the Loki image pullspec.
 	EnvRelatedImageLoki = "RELATED_IMAGE_LOKI"
 
@@ -253,6 +257,11 @@ func QuerierName(stackName string) string {
 	return fmt.Sprintf("%s-querier", stackName)
 }
 
+// QuerierName is the name of the querier deployment
+func ReadName(stackName string) string {
+	return fmt.Sprintf("%s-read", stackName)
+}
+
 // QueryFrontendName is the name of the query-frontend statefulset
 func QueryFrontendName(stackName string) string {
 	return fmt.Sprintf("%s-query-frontend", stackName)
@@ -277,6 +286,30 @@ func serviceNameIngesterGRPC(stackName string) string {
 
 func serviceNameIngesterHTTP(stackName string) string {
 	return fmt.Sprintf("%s-ingester-http", stackName)
+}
+
+func serviceNameWriteGRPC(stackName string) string {
+	return fmt.Sprintf("%s-write-grpc", stackName)
+}
+
+func serviceNameWriteHTTP(stackName string) string {
+	return fmt.Sprintf("%s-write-http", stackName)
+}
+
+func serviceNameReadGRPC(stackName string) string {
+	return fmt.Sprintf("%s-read-grpc", stackName)
+}
+
+func serviceNameReadHTTP(stackName string) string {
+	return fmt.Sprintf("%s-read-http", stackName)
+}
+
+func serviceNameBackendGRPC(stackName string) string {
+	return fmt.Sprintf("%s-backend-grpc", stackName)
+}
+
+func serviceNameBackendHTTP(stackName string) string {
+	return fmt.Sprintf("%s-backend-http", stackName)
 }
 
 func serviceNameDistributorGRPC(stackName string) string {

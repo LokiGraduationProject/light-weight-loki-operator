@@ -64,24 +64,24 @@ func ConfigOptions(opt Options) config.Options {
 		Stack:     opt.Stack,
 		Namespace: opt.Namespace,
 		Name:      opt.Name,
-		Compactor: config.Address{
-			FQDN: fqdn(NewCompactorGRPCService(opt).GetName(), opt.Namespace),
+		Read_grpc: config.Address{
+			FQDN: fqdn(NewReadGRPCService(opt).GetName(), opt.Namespace),
 			Port: grpcPort,
 		},
-		FrontendWorker: config.Address{
-			FQDN: fqdn(NewQueryFrontendGRPCService(opt).GetName(), opt.Namespace),
+		Read_http: config.Address{
+			Protocol: protocol,
+			FQDN:     fqdn(NewReadHTTPService(opt).GetName(), opt.Namespace),
+			Port:     httpPort,
+		},
+		Write: config.Address{
+			FQDN: fqdn(NewWriteGRPCService(opt).GetName(), opt.Namespace),
+			Port: grpcPort,
+		},
+		Backend: config.Address{
+			FQDN: fqdn(NewBackendGRPCService(opt).GetName(), opt.Namespace),
 			Port: grpcPort,
 		},
 		GossipRing: gossipRingConfig(opt.Name, opt.Namespace, opt.Stack.HashRing, opt.Stack.Replication),
-		Querier: config.Address{
-			Protocol: protocol,
-			FQDN:     fqdn(NewQuerierHTTPService(opt).GetName(), opt.Namespace),
-			Port:     httpPort,
-		},
-		IndexGateway: config.Address{
-			FQDN: fqdn(NewIndexGatewayGRPCService(opt).GetName(), opt.Namespace),
-			Port: grpcPort,
-		},
 		StorageDirectory: dataDirectory,
 		MaxConcurrent: config.MaxConcurrent{
 			AvailableQuerierCPUCores: int32(opt.ResourceRequirements.Querier.Requests.Cpu().Value()),
