@@ -19,7 +19,6 @@ package controller
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -50,11 +49,6 @@ func (r *LokiStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	switch {
 	case errors.As(err, &degraded):
 	case err != nil:
-		return ctrl.Result{}, err
-	}
-
-	err = status.Refresh(ctx, r.Client, req, time.Now(), degraded)
-	if err != nil {
 		return ctrl.Result{}, err
 	}
 

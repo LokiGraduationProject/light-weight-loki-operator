@@ -233,7 +233,7 @@ func NewBackendPodDisruptionBudget(opts Options) *policyv1.PodDisruptionBudget {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:    l,
-			Name:      ReadName(opts.Name),
+			Name:      BackendName(opts.Name),
 			Namespace: opts.Namespace,
 		},
 		Spec: policyv1.PodDisruptionBudgetSpec{

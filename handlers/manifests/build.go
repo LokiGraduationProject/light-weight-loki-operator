@@ -56,7 +56,6 @@ func ApplyDefaultSettings(opts *Options) error {
 		return kverrors.Wrap(err, "failed merging stack user options", "name", opts.Name)
 	}
 
-	opts.ResourceRequirements = internal.ResourceRequirementsTable[opts.Stack.Size]
 	opts.Stack = *spec
 
 	return nil

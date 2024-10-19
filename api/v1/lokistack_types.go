@@ -64,13 +64,6 @@ type LokiStackSpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:io.kubernetes:StorageClass",displayName="Storage Class Name"
 	StorageClassName string `json:"storageClassName"`
 
-	// Template defines the resource per component.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:advanced",displayName="Node Placement"
-	Template *LokiTemplateSpec `json:"template,omitempty"`
-
 	// Limits defines the limits to be applied to log stream processing.
 	//
 	// +optional
@@ -310,13 +303,6 @@ const (
 
 // LokiStackStatus defines the observed state of LokiStack
 type LokiStackStatus struct {
-	// Components provides summary of all Loki pod status grouped
-	// per component.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	Components LokiStackComponentStatus `json:"components,omitempty"`
-
 	// Storage provides summary of all changes that have occurred
 	// to the storage configuration.
 	//
@@ -330,66 +316,6 @@ type LokiStackStatus struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:io.kubernetes.conditions"
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
-}
-
-// LokiStackComponentStatus defines the map of per pod status per LokiStack component.
-// Each component is represented by a separate map of v1.Phase to a list of pods.
-type LokiStackComponentStatus struct {
-	// Compactor is a map to the pod status of the compactor pod.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Compactor",order=5
-	Compactor PodStatusMap `json:"compactor,omitempty"`
-
-	// Distributor is a map to the per pod status of the distributor deployment
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Distributor",order=1
-	Distributor PodStatusMap `json:"distributor,omitempty"`
-
-	// IndexGateway is a map to the per pod status of the index gateway statefulset
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="IndexGateway",order=6
-	IndexGateway PodStatusMap `json:"indexGateway,omitempty"`
-
-	// Ingester is a map to the per pod status of the ingester statefulset
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Ingester",order=2
-	Ingester PodStatusMap `json:"ingester,omitempty"`
-
-	// Querier is a map to the per pod status of the querier deployment
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Querier",order=3
-	Querier PodStatusMap `json:"querier,omitempty"`
-
-	// QueryFrontend is a map to the per pod status of the query frontend deployment
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Query Frontend",order=4
-	QueryFrontend PodStatusMap `json:"queryFrontend,omitempty"`
-
-	// Gateway is a map to the per pod status of the lokistack gateway deployment.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Gateway",order=5
-	Gateway PodStatusMap `json:"gateway,omitempty"`
-
-	// Ruler is a map to the per pod status of the lokistack ruler statefulset.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podStatuses",displayName="Ruler",order=6
-	Ruler PodStatusMap `json:"ruler,omitempty"`
 }
 
 // PodStatusMap defines the type for mapping pod status to pod name.
@@ -446,66 +372,6 @@ type LokiComponentSpec struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors="urn:alm:descriptor:com.tectonic.ui:podAntiAffinity",displayName="PodAntiAffinity"
 	PodAntiAffinity *corev1.PodAntiAffinity `json:"podAntiAffinity,omitempty"`
-}
-
-// LokiTemplateSpec defines the template of all requirements to configure
-// scheduling of all Loki components to be deployed.
-type LokiTemplateSpec struct {
-	// Compactor defines the compaction component spec.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Compactor pods"
-	Compactor *LokiComponentSpec `json:"compactor,omitempty"`
-
-	// Distributor defines the distributor component spec.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Distributor pods"
-	Distributor *LokiComponentSpec `json:"distributor,omitempty"`
-
-	// Ingester defines the ingester component spec.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Ingester pods"
-	Ingester *LokiComponentSpec `json:"ingester,omitempty"`
-
-	// Querier defines the querier component spec.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Querier pods"
-	Querier *LokiComponentSpec `json:"querier,omitempty"`
-
-	// QueryFrontend defines the query frontend component spec.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Query Frontend pods"
-	QueryFrontend *LokiComponentSpec `json:"queryFrontend,omitempty"`
-
-	// Gateway defines the lokistack gateway component spec.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Gateway pods"
-	Gateway *LokiComponentSpec `json:"gateway,omitempty"`
-
-	// IndexGateway defines the index gateway component spec.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Index Gateway pods"
-	IndexGateway *LokiComponentSpec `json:"indexGateway,omitempty"`
-
-	// Ruler defines the ruler component spec.
-	//
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Ruler pods"
-	Ruler *LokiComponentSpec `json:"ruler,omitempty"`
 }
 
 // LokiStackConditionType deifnes the type of condition types of a Loki deployment.

@@ -92,12 +92,12 @@ func newReadStatefulSet(opts Options) *appsv1.StatefulSet {
 						{
 							Image: opts.Image,
 							Name:  "loki-read-component",
-							Resources: corev1.ResourceRequirements{
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("500m"),
-									corev1.ResourceMemory: resource.MustParse("1Gi"),
-								},
-							},
+							// Resources: corev1.ResourceRequirements{
+							// 	Requests: corev1.ResourceList{
+							// 		corev1.ResourceCPU:    resource.MustParse("500m"),
+							// 		corev1.ResourceMemory: resource.MustParse("1Gi"),
+							// 	},
+							// },
 							Args: []string{
 								"-target=read",
 								fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),

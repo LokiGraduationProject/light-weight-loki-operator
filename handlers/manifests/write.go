@@ -91,12 +91,12 @@ func newWriteStatefulSet(opts Options) *appsv1.StatefulSet {
 						{
 							Image: opts.Image,
 							Name:  "loki-write-component",
-							Resources: corev1.ResourceRequirements{
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("500m"),
-									corev1.ResourceMemory: resource.MustParse("1Gi"),
-								},
-							},
+							// Resources: corev1.ResourceRequirements{
+							// 	Requests: corev1.ResourceList{
+							// 		corev1.ResourceCPU:    resource.MustParse("500m"),
+							// 		corev1.ResourceMemory: resource.MustParse("1Gi"),
+							// 	},
+							// },
 							Args: []string{
 								"-target=write",
 								fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
@@ -219,7 +219,7 @@ func NewWriteHTTPService(opts Options) *corev1.Service {
 }
 
 func newWritePodDisruptionBudget(opts Options) *policyv1.PodDisruptionBudget {
-	l := ComponentLabels(LabelIngesterComponent, opts.Name)
+	l := ComponentLabels(LabelWriteComponent, opts.Name)
 	// Default to 1 if not defined in ResourceRequirementsTable for a given size
 	mu := intstr.FromInt(1)
 	if opts.ResourceRequirements.Write.PDBMinAvailable > 0 {
@@ -232,7 +232,7 @@ func newWritePodDisruptionBudget(opts Options) *policyv1.PodDisruptionBudget {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:    l,
-			Name:      IngesterName(opts.Name),
+			Name:      WriteName(opts.Name),
 			Namespace: opts.Namespace,
 		},
 		Spec: policyv1.PodDisruptionBudgetSpec{

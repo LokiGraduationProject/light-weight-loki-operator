@@ -84,19 +84,12 @@ func ConfigOptions(opt Options) config.Options {
 		GossipRing:       gossipRingConfig(opt.Name, opt.Namespace, opt.Stack.HashRing, opt.Stack.Replication),
 		StorageDirectory: dataDirectory,
 		MaxConcurrent: config.MaxConcurrent{
-			AvailableQuerierCPUCores: int32(opt.ResourceRequirements.Querier.Requests.Cpu().Value()),
+			AvailableQuerierCPUCores: int32(opt.ResourceRequirements.Read.Requests.Cpu().Value()),
 		},
 		Shippers:      shippers,
 		ObjectStorage: opt.ObjectStorage,
 		HTTPTimeouts:  opt.Timeouts.Loki,
 	}
-}
-
-var deleteWorkerCountMap = map[lokiv1.LokiStackSizeType]uint{
-	lokiv1.SizeOneXDemo:       10,
-	lokiv1.SizeOneXExtraSmall: 10,
-	lokiv1.SizeOneXSmall:      150,
-	lokiv1.SizeOneXMedium:     150,
 }
 
 func gossipRingConfig(stackName, stackNs string, spec *lokiv1.HashRingSpec, replication *lokiv1.ReplicationSpec) config.GossipRing {

@@ -64,26 +64,24 @@ func configureReplication(podTemplate *corev1.PodTemplateSpec, replication *loki
 	topologyKey := strings.Join(zoneKeys, ",")
 	template.Annotations[lokiv1.AnnotationAvailabilityZoneLabels] = topologyKey
 
-	if component != LabelGatewayComponent {
-		template.Spec.InitContainers = []corev1.Container{
-			initContainerAZAnnotationCheck(podTemplate.Spec.Containers[0].Image),
-		}
+	template.Spec.InitContainers = []corev1.Container{
+		initContainerAZAnnotationCheck(podTemplate.Spec.Containers[0].Image),
+	}
 
-		src := corev1.Container{
-			Env: []corev1.EnvVar{availabilityZoneEnvVar},
-		}
+	src := corev1.Container{
+		Env: []corev1.EnvVar{availabilityZoneEnvVar},
+	}
 
-		for i, dst := range podTemplate.Spec.Containers {
-			if err := mergo.Merge(&dst, src, mergo.WithAppendSlice); err != nil {
-				return err
-			}
-			podTemplate.Spec.Containers[i] = dst
-		}
-
-		vols := []corev1.Volume{azAnnotationVolume()}
-		if err := mergo.Merge(&podTemplate.Spec.Volumes, vols, mergo.WithAppendSlice); err != nil {
+	for i, dst := range podTemplate.Spec.Containers {
+		if err := mergo.Merge(&dst, src, mergo.WithAppendSlice); err != nil {
 			return err
 		}
+		podTemplate.Spec.Containers[i] = dst
+	}
+
+	vols := []corev1.Volume{azAnnotationVolume()}
+	if err := mergo.Merge(&podTemplate.Spec.Volumes, vols, mergo.WithAppendSlice); err != nil {
+		return err
 	}
 
 	if err := mergo.Merge(podTemplate, template); err != nil {

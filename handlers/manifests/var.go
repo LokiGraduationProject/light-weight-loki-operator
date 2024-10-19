@@ -33,23 +33,6 @@ const (
 	// AnnotationLokiObjectStoreHash stores the last SHA1 hash of the loki object storage credetials.
 	AnnotationLokiObjectStoreHash string = "loki.grafana.com/object-store-hash"
 
-	// LabelCompactorComponent is the label value for the compactor component
-	LabelCompactorComponent string = "compactor"
-	// LabelDistributorComponent is the label value for the distributor component
-	LabelDistributorComponent string = "distributor"
-	// LabelIngesterComponent is the label value for the ingester component
-	LabelIngesterComponent string = "ingester"
-	// LabelQuerierComponent is the label value for the querier component
-	LabelQuerierComponent string = "querier"
-	// LabelQueryFrontendComponent is the label value for the query frontend component
-	LabelQueryFrontendComponent string = "query-frontend"
-	// LabelIndexGatewayComponent is the label value for the lokiStack-index-gateway component
-	LabelIndexGatewayComponent string = "index-gateway"
-	// LabelRulerComponent is the label value for the lokiStack-ruler component
-	LabelRulerComponent string = "ruler"
-	// LabelGatewayComponent is the label value for the lokiStack-gateway component
-	LabelGatewayComponent string = "lokistack-gateway"
-
 	LabelWriteComponent   string = "write"
 	LabelReadComponent    string = "read"
 	LabelBackendComponent string = "backend"
@@ -237,39 +220,16 @@ func lokiConfigMapName(stackName string) string {
 	return fmt.Sprintf("%s-config", stackName)
 }
 
-// CompactorName is the name of the compactor statefulset
-func CompactorName(stackName string) string {
-	return fmt.Sprintf("%s-compactor", stackName)
-}
-
-// DistributorName is the name of the distributor deployment
-func DistributorName(stackName string) string {
-	return fmt.Sprintf("%s-distributor", stackName)
-}
-
-// IngesterName is the name of the compactor statefulset
-func IngesterName(stackName string) string {
-	return fmt.Sprintf("%s-ingester", stackName)
-}
-
-// QuerierName is the name of the querier deployment
-func QuerierName(stackName string) string {
-	return fmt.Sprintf("%s-querier", stackName)
-}
-
-// QuerierName is the name of the querier deployment
 func ReadName(stackName string) string {
 	return fmt.Sprintf("%s-read", stackName)
 }
 
-// QueryFrontendName is the name of the query-frontend statefulset
-func QueryFrontendName(stackName string) string {
-	return fmt.Sprintf("%s-query-frontend", stackName)
+func WriteName(stackName string) string {
+	return fmt.Sprintf("%s-read", stackName)
 }
 
-// IndexGatewayName is the name of the index-gateway statefulset
-func IndexGatewayName(stackName string) string {
-	return fmt.Sprintf("%s-index-gateway", stackName)
+func BackendName(stackName string) string {
+	return fmt.Sprintf("%s-read", stackName)
 }
 
 func serviceNameWriteGRPC(stackName string) string {
