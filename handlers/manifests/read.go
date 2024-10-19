@@ -10,7 +10,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	policyv1 "k8s.io/api/policy/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -19,49 +18,49 @@ import (
 )
 
 func BuildReadComponent(opts Options) ([]client.Object, error) {
-	statefulSet := newReadStatefulSet(opts)
+	deployment := newReadDeployment(opts)
 
-	if err := storage.ConfigureStatefulSet(statefulSet, opts.ObjectStorage); err != nil {
+	if err := storage.ConfigureDeployment(deployment, opts.ObjectStorage); err != nil {
 		return nil, err
 	}
 
-	if err := configureHashRingEnv(&statefulSet.Spec.Template.Spec, opts); err != nil {
+	if err := configureHashRingEnv(&deployment.Spec.Template.Spec, opts); err != nil {
 		return nil, err
 	}
 
-	if err := configureProxyEnv(&statefulSet.Spec.Template.Spec, opts); err != nil {
+	if err := configureProxyEnv(&deployment.Spec.Template.Spec, opts); err != nil {
 		return nil, err
 	}
 
-	if err := configureReplication(&statefulSet.Spec.Template, opts.Stack.Replication, LabelReadComponent, opts.Name); err != nil {
+	if err := configureReplication(&deployment.Spec.Template, opts.Stack.Replication, LabelReadComponent, opts.Name); err != nil {
 		return nil, err
 	}
 
 	return []client.Object{
-		statefulSet,
+		deployment,
 		NewReadGRPCService(opts),
 		NewReadHTTPService(opts),
 		NewReadPodDisruptionBudget(opts),
 	}, nil
 }
 
-func newReadStatefulSet(opts Options) *appsv1.StatefulSet {
+func newReadDeployment(opts Options) *appsv1.Deployment {
 	l := ComponentLabels(LabelReadComponent, opts.Name)
 	a := commonAnnotations(opts)
 
 	replicas := int32(1)
 
-	return &appsv1.StatefulSet{
+	return &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "StatefulSet",
+			Kind:       "Deployment",
 			APIVersion: appsv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   "loki-read",
 			Labels: l,
 		},
-		Spec: appsv1.StatefulSetSpec{
-			PodManagementPolicy:  appsv1.OrderedReadyPodManagement,
+		Spec: appsv1.DeploymentSpec{
+			// PodManagementPolicy:  appsv1.OrderedReadyPodManagement,
 			RevisionHistoryLimit: ptr.To(defaultRevHistoryLimit),
 			Replicas:             &replicas,
 			Selector: &metav1.LabelSelector{
@@ -92,12 +91,6 @@ func newReadStatefulSet(opts Options) *appsv1.StatefulSet {
 						{
 							Image: opts.Image,
 							Name:  "loki-read-component",
-							// Resources: corev1.ResourceRequirements{
-							// 	Requests: corev1.ResourceList{
-							// 		corev1.ResourceCPU:    resource.MustParse("500m"),
-							// 		corev1.ResourceMemory: resource.MustParse("1Gi"),
-							// 	},
-							// },
 							Args: []string{
 								"-target=read",
 								fmt.Sprintf("-config.file=%s", path.Join(config.LokiConfigMountDir, config.LokiConfigFileName)),
@@ -128,36 +121,11 @@ func newReadStatefulSet(opts Options) *appsv1.StatefulSet {
 									ReadOnly:  false,
 									MountPath: config.LokiConfigMountDir,
 								},
-								{
-									Name:      storageVolumeName,
-									ReadOnly:  false,
-									MountPath: dataDirectory,
-								},
 							},
 							TerminationMessagePath:   "/dev/termination-log",
 							TerminationMessagePolicy: "File",
 							ImagePullPolicy:          "IfNotPresent",
 						},
-					},
-				},
-			},
-			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: l,
-						Name:   storageVolumeName,
-					},
-					Spec: corev1.PersistentVolumeClaimSpec{
-						AccessModes: []corev1.PersistentVolumeAccessMode{
-							corev1.ReadWriteOnce,
-						},
-						Resources: corev1.ResourceRequirements{
-							Requests: corev1.ResourceList{
-								corev1.ResourceStorage: resource.MustParse("10Gi"),
-							},
-						},
-						StorageClassName: ptr.To(opts.Stack.StorageClassName),
-						VolumeMode:       &volumeFileSystemMode,
 					},
 				},
 			},
